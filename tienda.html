@@ -1,0 +1,1214 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>1807.studio | Tienda</title>
+    <link rel="icon" type="image/svg+xml"
+        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>👜</text></svg>">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box
+        }
+
+        :root {
+            --gold: #C9A962;
+            --gold-dark: #9A7B3C;
+            --bg: #0D0D0D;
+            --bg-card: #1A1A1A;
+            --text: #FFF;
+            --text-sec: #B8B8B8;
+            --success: #4ADE80;
+            --danger: #F87171;
+            --warning: #FBBF24
+        }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh
+        }
+
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            background: rgba(13, 13, 13, .95);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, .08);
+            padding: 0 2rem;
+            height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--gold)
+        }
+
+        .logo span {
+            color: var(--text);
+            font-weight: 400
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 1rem
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: .75rem;
+            padding: .5rem 1rem;
+            background: var(--bg-card);
+            border-radius: 30px
+        }
+
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            color: var(--bg)
+        }
+
+        .btn {
+            padding: .75rem 1.25rem;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all .3s;
+            display: inline-flex;
+            align-items: center;
+            gap: .5rem;
+            text-decoration: none;
+            font-size: .85rem
+        }
+
+        .btn-gold {
+            background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+            color: var(--bg)
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, .1);
+            color: var(--text)
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: #fff
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: var(--bg)
+        }
+
+        .container {
+            display: flex;
+            padding-top: 70px;
+            min-height: 100vh
+        }
+
+        .products-panel {
+            flex: 1;
+            padding: 1.5rem;
+            overflow-y: auto;
+            max-height: calc(100vh - 70px)
+        }
+
+        .title {
+            font-size: 1.75rem;
+            margin-bottom: .5rem;
+            color: var(--gold)
+        }
+
+        .subtitle {
+            color: var(--text-sec);
+            margin-bottom: 1.5rem
+        }
+
+        .search-bar {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem
+        }
+
+        .search-input {
+            flex: 1;
+            padding: .875rem 1rem;
+            background: var(--bg-card);
+            border: 1px solid rgba(255, 255, 255, .08);
+            border-radius: 10px;
+            color: var(--text);
+            font-size: .9rem
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--gold)
+        }
+
+        .category-section {
+            margin-bottom: 2rem
+        }
+
+        .category-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: .75rem;
+            border-bottom: 1px solid rgba(255, 255, 255, .08)
+        }
+
+        .category-title {
+            font-size: 1.25rem;
+            color: var(--gold);
+            display: flex;
+            align-items: center;
+            gap: .5rem
+        }
+
+        .category-count {
+            font-size: .8rem;
+            color: var(--text-sec)
+        }
+
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 1.25rem
+        }
+
+        .product-card {
+            background: var(--bg-card);
+            border: 1px solid rgba(255, 255, 255, .08);
+            border-radius: 16px;
+            overflow: hidden;
+            transition: all .3s
+        }
+
+        .product-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, .4);
+            border-color: rgba(201, 169, 98, .3)
+        }
+
+        .product-image {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+            background: var(--bg)
+        }
+
+        .product-info {
+            padding: 1.25rem
+        }
+
+        .product-name {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: .35rem
+        }
+
+        .product-desc {
+            font-size: .8rem;
+            color: var(--text-sec);
+            margin-bottom: .75rem;
+            line-height: 1.4;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden
+        }
+
+        .product-bottom {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: .75rem
+        }
+
+        .product-price {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--gold)
+        }
+
+        .product-stock {
+            font-size: .75rem;
+            padding: .25rem .5rem;
+            border-radius: 20px
+        }
+
+        .stock-in {
+            background: rgba(74, 222, 128, .15);
+            color: var(--success)
+        }
+
+        .stock-low {
+            background: rgba(251, 191, 36, .15);
+            color: var(--warning)
+        }
+
+        .stock-out {
+            background: rgba(248, 113, 113, .15);
+            color: var(--danger)
+        }
+
+        .product-actions {
+            display: flex;
+            gap: .5rem
+        }
+
+        .add-btn {
+            flex: 1;
+            padding: .75rem;
+            background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+            border: none;
+            border-radius: 8px;
+            color: var(--bg);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all .3s
+        }
+
+        .add-btn:disabled {
+            background: var(--bg);
+            color: var(--text-sec);
+            cursor: not-allowed
+        }
+
+        .edit-btn,
+        .del-btn {
+            width: 40px;
+            height: 40px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            transition: all .3s;
+            background: #242424
+        }
+
+        .edit-btn {
+            color: #60A5FA
+        }
+
+        .del-btn {
+            color: var(--danger)
+        }
+
+        .cart-panel {
+            width: 400px;
+            background: var(--bg-card);
+            border-left: 1px solid rgba(255, 255, 255, .08);
+            display: flex;
+            flex-direction: column;
+            height: calc(100vh - 70px)
+        }
+
+        .cart-header {
+            padding: 1.25rem;
+            border-bottom: 1px solid rgba(255, 255, 255, .08);
+            display: flex;
+            justify-content: space-between;
+            align-items: center
+        }
+
+        .cart-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: .5rem
+        }
+
+        .cart-count {
+            background: var(--gold);
+            color: var(--bg);
+            font-size: .75rem;
+            padding: .2rem .5rem;
+            border-radius: 20px
+        }
+
+        .clear-cart {
+            background: none;
+            border: none;
+            color: var(--danger);
+            cursor: pointer
+        }
+
+        .cart-items {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1rem
+        }
+
+        .cart-empty {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: var(--text-sec)
+        }
+
+        .cart-empty-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: .3
+        }
+
+        .cart-item {
+            display: flex;
+            gap: 1rem;
+            padding: 1rem;
+            background: var(--bg);
+            border-radius: 12px;
+            margin-bottom: .75rem
+        }
+
+        .cart-item-img {
+            width: 60px;
+            height: 60px;
+            border-radius: 8px;
+            object-fit: cover
+        }
+
+        .cart-item-info {
+            flex: 1
+        }
+
+        .cart-item-name {
+            font-size: .9rem;
+            font-weight: 500;
+            margin-bottom: .25rem
+        }
+
+        .cart-item-price {
+            color: var(--gold);
+            font-weight: 600
+        }
+
+        .cart-item-qty {
+            display: flex;
+            align-items: center;
+            gap: .5rem;
+            margin-top: .5rem
+        }
+
+        .qty-btn {
+            width: 28px;
+            height: 28px;
+            border: none;
+            border-radius: 6px;
+            background: var(--bg-card);
+            color: var(--text);
+            cursor: pointer
+        }
+
+        .qty-btn:hover {
+            background: var(--gold);
+            color: var(--bg)
+        }
+
+        .cart-item-remove {
+            background: none;
+            border: none;
+            color: var(--danger);
+            cursor: pointer;
+            font-size: 1.25rem
+        }
+
+        .cart-summary {
+            padding: 1.25rem;
+            border-top: 1px solid rgba(255, 255, 255, .08);
+            background: rgba(0, 0, 0, .3)
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: .5rem;
+            font-size: .9rem
+        }
+
+        .summary-row.total {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(255, 255, 255, .08)
+        }
+
+        .summary-row.total span:last-child {
+            color: var(--gold)
+        }
+
+        .checkout-btn {
+            width: 100%;
+            padding: 1rem;
+            background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+            border: none;
+            border-radius: 12px;
+            color: var(--bg);
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 1rem
+        }
+
+        .checkout-btn:disabled {
+            background: #242424;
+            color: var(--text-sec);
+            cursor: not-allowed
+        }
+
+        .modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, .85);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: all .3s
+        }
+
+        .modal.active {
+            opacity: 1;
+            visibility: visible
+        }
+
+        .modal-content {
+            background: var(--bg-card);
+            border: 1px solid rgba(255, 255, 255, .1);
+            border-radius: 20px;
+            width: 100%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto
+        }
+
+        .modal-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, .08);
+            display: flex;
+            justify-content: space-between;
+            align-items: center
+        }
+
+        .modal-title {
+            font-size: 1.25rem;
+            font-weight: 600
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--text-sec);
+            font-size: 1.5rem;
+            cursor: pointer
+        }
+
+        .modal-body {
+            padding: 1.5rem
+        }
+
+        .modal-footer {
+            padding: 1.5rem;
+            border-top: 1px solid rgba(255, 255, 255, .08);
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end
+        }
+
+        .form-group {
+            margin-bottom: 1rem
+        }
+
+        .form-label {
+            display: block;
+            color: var(--text-sec);
+            font-size: .85rem;
+            margin-bottom: .5rem
+        }
+
+        .form-input,
+        .form-select {
+            width: 100%;
+            padding: .875rem 1rem;
+            background: var(--bg);
+            border: 1px solid rgba(255, 255, 255, .1);
+            border-radius: 10px;
+            color: var(--text);
+            font-size: .9rem
+        }
+
+        .form-input:focus,
+        .form-select:focus {
+            outline: none;
+            border-color: var(--gold)
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem
+        }
+
+        .payment-tabs {
+            display: flex;
+            gap: .5rem;
+            margin-bottom: 1.5rem
+        }
+
+        .payment-tab {
+            flex: 1;
+            padding: 1rem;
+            background: var(--bg);
+            border: 2px solid rgba(255, 255, 255, .08);
+            border-radius: 12px;
+            text-align: center;
+            cursor: pointer
+        }
+
+        .payment-tab.active {
+            border-color: var(--gold);
+            background: rgba(201, 169, 98, .1)
+        }
+
+        .payment-icon {
+            font-size: 2rem;
+            margin-bottom: .5rem
+        }
+
+        .cash-calc {
+            background: var(--bg);
+            border-radius: 12px;
+            padding: 1.5rem
+        }
+
+        .cash-total {
+            text-align: center;
+            margin-bottom: 1rem
+        }
+
+        .cash-total-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--gold)
+        }
+
+        .cash-input {
+            width: 100%;
+            padding: 1rem;
+            background: var(--bg-card);
+            border: 1px solid rgba(255, 255, 255, .1);
+            border-radius: 10px;
+            color: var(--text);
+            font-size: 1.5rem;
+            text-align: center;
+            font-weight: 600
+        }
+
+        .quick-amounts {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: .5rem;
+            margin: 1rem 0
+        }
+
+        .quick-amt {
+            padding: .75rem;
+            background: var(--bg-card);
+            border: 1px solid rgba(255, 255, 255, .1);
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            font-weight: 600
+        }
+
+        .quick-amt:hover {
+            background: var(--gold);
+            color: var(--bg)
+        }
+
+        .change-box {
+            padding: 1.5rem;
+            border-radius: 12px;
+            text-align: center;
+            margin-top: 1rem
+        }
+
+        .change-box.ok {
+            background: linear-gradient(135deg, var(--success), #22C55E)
+        }
+
+        .change-box.err {
+            background: var(--danger)
+        }
+
+        .change-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--bg)
+        }
+
+        .invoice {
+            background: #fff;
+            color: #333;
+            border-radius: 12px;
+            padding: 2rem;
+            max-width: 400px;
+            margin: 0 auto
+        }
+
+        .invoice-header {
+            text-align: center;
+            border-bottom: 2px dashed #ddd;
+            padding-bottom: 1rem;
+            margin-bottom: 1rem
+        }
+
+        .invoice-logo {
+            font-size: 1.5rem;
+            color: #9A7B3C
+        }
+
+        .invoice-row {
+            display: flex;
+            justify-content: space-between;
+            padding: .5rem 0;
+            font-size: .85rem
+        }
+
+        .invoice-totals {
+            border-top: 2px dashed #ddd;
+            padding-top: 1rem;
+            margin-top: 1rem
+        }
+
+        .invoice-grand {
+            font-weight: 700;
+            font-size: 1.1rem;
+            border-top: 1px solid #ddd;
+            margin-top: .5rem;
+            padding-top: .5rem
+        }
+
+        .invoice-footer {
+            text-align: center;
+            margin-top: 1.5rem;
+            padding-top: 1rem;
+            border-top: 2px dashed #ddd;
+            font-size: .8rem;
+            color: #666
+        }
+
+        .vendor-panel {
+            background: var(--bg-card);
+            border: 1px solid rgba(255, 255, 255, .08);
+            border-radius: 16px;
+            margin-bottom: 2rem;
+            overflow: hidden
+        }
+
+        .vendor-header {
+            padding: 1.25rem;
+            background: rgba(201, 169, 98, .1);
+            border-bottom: 1px solid rgba(255, 255, 255, .08);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer
+        }
+
+        .vendor-header h3 {
+            display: flex;
+            align-items: center;
+            gap: .75rem
+        }
+
+        .vendor-list {
+            max-height: 350px;
+            overflow-y: auto
+        }
+
+        .vendor-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, .05)
+        }
+
+        .vendor-item:hover {
+            background: #242424
+        }
+
+        .vendor-img {
+            width: 50px;
+            height: 50px;
+            border-radius: 8px;
+            object-fit: cover
+        }
+
+        .vendor-info {
+            flex: 1
+        }
+
+        .vendor-name {
+            font-weight: 600;
+            margin-bottom: .25rem
+        }
+
+        .vendor-details {
+            font-size: .8rem;
+            color: var(--text-sec)
+        }
+
+        .vendor-price {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--gold);
+            min-width: 80px;
+            text-align: right
+        }
+
+        .vendor-actions {
+            display: flex;
+            gap: .5rem
+        }
+
+        .vendor-add {
+            padding: .5rem 1rem;
+            background: var(--gold);
+            border: none;
+            border-radius: 6px;
+            color: var(--bg);
+            font-weight: 600;
+            cursor: pointer
+        }
+
+        .vendor-add:disabled {
+            background: var(--bg);
+            color: var(--text-sec);
+            cursor: not-allowed
+        }
+
+        @media(max-width:992px) {
+            .cart-panel {
+                position: fixed;
+                right: -100%;
+                top: 70px;
+                height: calc(100vh - 70px);
+                transition: right .3s;
+                z-index: 99;
+                width: 100%;
+                max-width: 400px
+            }
+
+            .cart-panel.active {
+                right: 0
+            }
+        }
+
+        @media(max-width:576px) {
+            .products-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: .75rem
+            }
+
+            .product-image {
+                height: 140px
+            }
+
+            .form-row {
+                grid-template-columns: 1fr
+            }
+        }
+
+        .cart-toggle {
+            display: none;
+            position: fixed;
+            bottom: 1.5rem;
+            right: 1.5rem;
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            z-index: 98;
+            box-shadow: 0 8px 25px rgba(201, 169, 98, .4);
+            font-size: 1.5rem;
+            align-items: center;
+            justify-content: center
+        }
+
+        .cart-toggle-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: var(--danger);
+            color: #fff;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            font-size: .75rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center
+        }
+
+        @media(max-width:992px) {
+            .cart-toggle {
+                display: flex
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header class="header">
+        <div class="logo">1807<span>.studio</span></div>
+        <div class="header-actions">
+            <div class="user-info">
+                <div class="user-avatar" id="userAvatar">U</div>
+                <div>
+                    <div id="userName">Usuario</div>
+                    <div id="userRole" style="font-size:.7rem;color:var(--gold)">Cliente</div>
+                </div>
+            </div>
+            <a href="index.html" class="btn btn-outline" id="adminLink" style="display:none">📊 Dashboard</a>
+            <button class="btn btn-outline" onclick="logout()">🚪 Salir</button>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="products-panel">
+            <h1 class="title" id="pageTitle">🛍️ Catálogo de Productos</h1>
+            <p class="subtitle">Explora nuestra colección de bolsos exclusivos por categoría</p>
+
+            <div class="vendor-panel" id="vendorPanel" style="display:none">
+                <div class="vendor-header"
+                    onclick="document.getElementById('vendorList').style.display=document.getElementById('vendorList').style.display==='none'?'block':'none'">
+                    <h3>📋 Lista Rápida para Venta</h3>
+                    <span>▼</span>
+                </div>
+                <div class="vendor-list" id="vendorList"></div>
+            </div>
+
+            <div class="search-bar">
+                <input type="text" class="search-input" id="searchInput" placeholder="🔍 Buscar productos..."
+                    oninput="render()">
+            </div>
+            <div id="categoriesContainer"></div>
+        </div>
+
+        <div class="cart-panel" id="cartPanel">
+            <div class="cart-header">
+                <h2 class="cart-title">🛒 Carrito <span class="cart-count" id="cartCount">0</span></h2>
+                <button class="clear-cart" onclick="cart=[];updateCart()">Vaciar</button>
+            </div>
+            <div class="cart-items" id="cartItems">
+                <div class="cart-empty">
+                    <div class="cart-empty-icon">🛒</div>
+                    <p>El carrito está vacío</p>
+                </div>
+            </div>
+            <div class="cart-summary">
+                <div class="summary-row"><span>Subtotal</span><span id="subtotal">$0.00</span></div>
+                <div class="summary-row"><span>Impuesto</span><span>$0.00</span></div>
+                <div class="summary-row total"><span>Total</span><span id="total">$0.00</span></div>
+                <button class="checkout-btn" id="checkoutBtn" onclick="openPayment()" disabled>💳 Proceder al
+                    Pago</button>
+            </div>
+        </div>
+    </div>
+
+    <button class="cart-toggle" onclick="document.getElementById('cartPanel').classList.toggle('active')">🛒<span
+            class="cart-toggle-badge" id="cartBadge">0</span></button>
+
+    <div class="modal" id="editModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">✏️ Editar Producto</h3><button class="modal-close"
+                    onclick="closeEdit()">×</button>
+            </div>
+            <form id="editForm" onsubmit="saveEdit(event)">
+                <div class="modal-body">
+                    <input type="hidden" id="editId">
+                    <div class="form-row">
+                        <div class="form-group"><label class="form-label">Nombre</label><input type="text"
+                                class="form-input" id="editName" required></div>
+                        <div class="form-group"><label class="form-label">SKU</label><input type="text"
+                                class="form-input" id="editSku" required></div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group"><label class="form-label">Categoría</label><select class="form-select"
+                                id="editCat" required>
+                                <option>Bolso de mano</option>
+                                <option>Cartera</option>
+                                <option>Mochila</option>
+                                <option>Clutch</option>
+                                <option>Tote</option>
+                            </select></div>
+                        <div class="form-group"><label class="form-label">Precio ($)</label><input type="number"
+                                class="form-input" id="editPrice" step="0.01" required></div>
+                    </div>
+                    <div class="form-group"><label class="form-label">Stock</label><input type="number"
+                            class="form-input" id="editStock" required></div>
+                </div>
+                <div class="modal-footer"><button type="button" class="btn btn-outline"
+                        onclick="closeEdit()">Cancelar</button><button type="submit" class="btn btn-gold">💾
+                        Guardar</button></div>
+            </form>
+        </div>
+    </div>
+
+    <div class="modal" id="deleteModal">
+        <div class="modal-content" style="max-width:400px">
+            <div class="modal-header">
+                <h3 class="modal-title">⚠️ Eliminar Producto</h3><button class="modal-close"
+                    onclick="closeDelete()">×</button>
+            </div>
+            <div class="modal-body" style="text-align:center">
+                <p>¿Estás seguro de eliminar este producto?</p>
+                <p style="color:var(--danger);margin-top:.5rem">Esta acción no se puede deshacer.</p>
+            </div>
+            <div class="modal-footer" style="justify-content:center"><button class="btn btn-outline"
+                    onclick="closeDelete()">Cancelar</button><button class="btn btn-danger"
+                    onclick="confirmDelete()">🗑️ Eliminar</button></div>
+        </div>
+    </div>
+
+    <div class="modal" id="paymentModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">💳 Método de Pago</h3><button class="modal-close"
+                    onclick="closePayment()">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="payment-tabs">
+                    <div class="payment-tab active" onclick="setPayment('cash')">
+                        <div class="payment-icon">💵</div>
+                        <div>Efectivo</div>
+                    </div>
+                    <div class="payment-tab" onclick="setPayment('qr')">
+                        <div class="payment-icon">📱</div>
+                        <div>QR</div>
+                    </div>
+                    <div class="payment-tab" onclick="setPayment('transfer')">
+                        <div class="payment-icon">🏦</div>
+                        <div>Transferencia</div>
+                    </div>
+                </div>
+                <div id="cashPanel" class="cash-calc">
+                    <div class="cash-total">
+                        <div style="color:var(--text-sec);font-size:.85rem">Total a Pagar</div>
+                        <div class="cash-total-value" id="cashTotal">$0.00</div>
+                    </div>
+                    <div class="form-group"><label class="form-label">Monto Recibido ($)</label><input type="number"
+                            class="cash-input" id="cashReceived" placeholder="0.00" oninput="calcChange()"></div>
+                    <div class="quick-amounts">
+                        <button type="button" class="quick-amt"
+                            onclick="document.getElementById('cashReceived').value=20;calcChange()">$20</button>
+                        <button type="button" class="quick-amt"
+                            onclick="document.getElementById('cashReceived').value=50;calcChange()">$50</button>
+                        <button type="button" class="quick-amt"
+                            onclick="document.getElementById('cashReceived').value=100;calcChange()">$100</button>
+                        <button type="button" class="quick-amt"
+                            onclick="document.getElementById('cashReceived').value=200;calcChange()">$200</button>
+                    </div>
+                    <div class="change-box ok" id="changeBox">
+                        <div style="font-size:.85rem;opacity:.8">Cambio a Devolver</div>
+                        <div class="change-value" id="changeValue">$0.00</div>
+                    </div>
+                </div>
+                <div id="qrPanel" style="display:none;text-align:center"><img
+                        src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=1807studio-pago"
+                        style="border-radius:12px;margin:1rem 0">
+                    <p style="color:var(--text-sec)">Escanea el código QR</p>
+                    <p id="qrTotal" style="color:var(--gold);font-size:1.5rem;font-weight:700;margin-top:.5rem">$0.00
+                    </p>
+                </div>
+                <div id="transferPanel" style="display:none;background:var(--bg);border-radius:12px;padding:1.5rem">
+                    <div
+                        style="display:flex;justify-content:space-between;padding:.75rem 0;border-bottom:1px solid rgba(255,255,255,.05)">
+                        <span style="color:var(--text-sec)">Banco</span><span>Banco Nacional</span>
+                    </div>
+                    <div
+                        style="display:flex;justify-content:space-between;padding:.75rem 0;border-bottom:1px solid rgba(255,255,255,.05)">
+                        <span style="color:var(--text-sec)">Titular</span><span>1807 Studio S.A.</span>
+                    </div>
+                    <div
+                        style="display:flex;justify-content:space-between;padding:.75rem 0;border-bottom:1px solid rgba(255,255,255,.05)">
+                        <span style="color:var(--text-sec)">Cuenta</span><span>1234-5678-9012</span>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;padding:.75rem 0"><span
+                            style="color:var(--text-sec)">Total</span><span id="transferTotal"
+                            style="color:var(--gold);font-size:1.25rem;font-weight:700">$0.00</span></div>
+                </div>
+            </div>
+            <div class="modal-footer"><button class="btn btn-outline" onclick="closePayment()">Cancelar</button><button
+                    class="btn btn-success" onclick="confirmPay()">✓ Confirmar Pago</button></div>
+        </div>
+    </div>
+
+    <div class="modal" id="invoiceModal">
+        <div class="modal-content" style="max-width:450px">
+            <div class="modal-header">
+                <h3 class="modal-title">🧾 Factura</h3><button class="modal-close" onclick="closeInvoice()">×</button>
+            </div>
+            <div class="modal-body" id="invoiceContent"></div>
+            <div class="modal-footer"><button class="btn btn-outline" onclick="closeInvoice()">Cerrar</button><button
+                    class="btn btn-gold" onclick="printInvoice()">🖨️ Imprimir</button></div>
+        </div>
+    </div>
+
+    <script>
+        const sampleProducts = [
+            { id: 1, name: "Elegance Classic Tote", category: "Tote", sku: "ECT-001", price: 189.99, stock: 15, description: "Bolso tote de cuero genuino con acabados en oro.", image: "https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=400&h=400&fit=crop" },
+            { id: 2, name: "Urban Chic Crossbody", category: "Bolso de mano", sku: "UCC-002", price: 129.99, stock: 8, description: "Crossbody moderno con diseño minimalista.", image: "https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=400&h=400&fit=crop" },
+            { id: 3, name: "Executive Leather Bag", category: "Cartera", sku: "ELB-003", price: 249.99, stock: 3, description: "Cartera ejecutiva premium en cuero italiano.", image: "https://images.unsplash.com/photo-1590874103328-eac38a683ce7?w=400&h=400&fit=crop" },
+            { id: 4, name: "Mini Evening Clutch", category: "Clutch", sku: "MEC-004", price: 89.99, stock: 20, description: "Clutch elegante para eventos especiales.", image: "https://images.unsplash.com/photo-1566150905458-1bf1fc113f0d?w=400&h=400&fit=crop" },
+            { id: 5, name: "Voyager Backpack", category: "Mochila", sku: "VBP-005", price: 169.99, stock: 12, description: "Mochila de viaje premium.", image: "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=400&h=400&fit=crop" },
+            { id: 6, name: "Luxe Shoulder Bag", category: "Bolso de mano", sku: "LSB-006", price: 199.99, stock: 7, description: "Bolso de hombro de lujo.", image: "https://images.unsplash.com/photo-1594223274512-ad4803739b7c?w=400&h=400&fit=crop" }
+        ];
+
+        let products = JSON.parse(localStorage.getItem('1807_products')) || [];
+        if (products.length === 0) { products = sampleProducts; localStorage.setItem('1807_products', JSON.stringify(products)) }
+
+        let cart = [], currentUser = JSON.parse(localStorage.getItem('1807_currentUser')), deleteId = null, payMethod = 'cash';
+        const categories = ['Bolso de mano', 'Cartera', 'Mochila', 'Clutch', 'Tote'];
+        const icons = { 'Bolso de mano': '👜', 'Cartera': '💼', 'Mochila': '🎒', 'Clutch': '👛', 'Tote': '🛍️' };
+
+        if (!currentUser) window.location.href = 'login.html';
+
+        function init() {
+            document.getElementById('userName').textContent = currentUser.name;
+            document.getElementById('userRole').textContent = currentUser.role === 'vendedor' ? 'Vendedor' : 'Cliente';
+            document.getElementById('userAvatar').textContent = currentUser.name[0].toUpperCase();
+            if (currentUser.role === 'admin') {
+                document.getElementById('adminLink').style.display = 'flex';
+                document.getElementById('vendorPanel').style.display = 'block';
+                document.getElementById('pageTitle').textContent = '📊 Administración de Productos';
+            }
+            if (currentUser.role === 'vendedor') {
+                document.getElementById('vendorPanel').style.display = 'block';
+                document.getElementById('pageTitle').textContent = '📋 Punto de Venta';
+            }
+            render();
+        }
+
+        function logout() { localStorage.removeItem('1807_currentUser'); window.location.href = 'login.html' }
+        function formatPrice(p) { return new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'USD' }).format(p) }
+
+        function render() {
+            const search = document.getElementById('searchInput').value.toLowerCase();
+            const isAdmin = currentUser && currentUser.role === 'admin';
+            let html = '';
+
+            categories.forEach(cat => {
+                const prods = products.filter(p => p.category === cat && (!search || p.name.toLowerCase().includes(search) || p.description.toLowerCase().includes(search)));
+                html += `<div class="category-section"><div class="category-header"><h2 class="category-title">${icons[cat] || '📦'} ${cat}</h2><span class="category-count">${prods.length} productos</span></div>`;
+                if (prods.length > 0) {
+                    html += '<div class="products-grid">';
+                    prods.forEach(p => {
+                        const sc = p.stock === 0 ? 'out' : p.stock < 5 ? 'low' : 'in';
+                        const st = p.stock === 0 ? 'Agotado' : p.stock < 5 ? 'Poco stock' : p.stock + ' disp.';
+                        html += `<div class="product-card"><img src="${p.image}" class="product-image" onerror="this.src='https://via.placeholder.com/240x180/1a1a1a/666?text=Producto'"><div class="product-info"><h3 class="product-name">${p.name}</h3><p class="product-desc">${p.description || ''}</p><div class="product-bottom"><span class="product-price">${formatPrice(p.price)}</span><span class="product-stock stock-${sc}">${st}</span></div><div class="product-actions"><button class="add-btn" onclick="addToCart(${p.id})" ${p.stock === 0 ? 'disabled' : ''}>${p.stock === 0 ? 'Sin Stock' : '🛒 Agregar'}</button>${isAdmin ? `<button class="edit-btn" onclick="openEdit(${p.id})">✏️</button><button class="del-btn" onclick="openDelete(${p.id})">🗑️</button>` : ''}</div></div></div>`;
+                    });
+                    html += '</div>';
+                } else {
+                    html += '<div style="text-align:center;padding:2rem;color:var(--text-sec);background:var(--bg-card);border-radius:12px;border:1px dashed rgba(255,255,255,.1)">No hay productos en esta categoría</div>';
+                }
+                html += '</div>';
+            });
+
+            document.getElementById('categoriesContainer').innerHTML = html;
+            if (isAdmin) renderVendorList(search);
+        }
+
+        function renderVendorList(search) {
+            const list = document.getElementById('vendorList');
+            const filtered = products.filter(p => !search || p.name.toLowerCase().includes(search));
+            list.innerHTML = filtered.map(p => {
+                const sc = p.stock === 0 ? 'out' : p.stock < 5 ? 'low' : 'in';
+                return `<div class="vendor-item"><img src="${p.image}" class="vendor-img" onerror="this.src='https://via.placeholder.com/50'"><div class="vendor-info"><div class="vendor-name">${p.name}</div><div class="vendor-details">SKU: ${p.sku} | ${p.category} | <span class="product-stock stock-${sc}">Stock: ${p.stock}</span></div></div><div class="vendor-price">${formatPrice(p.price)}</div><div class="vendor-actions"><button class="vendor-add" onclick="addToCart(${p.id})" ${p.stock === 0 ? 'disabled' : ''}>${p.stock === 0 ? 'Agotado' : '+ Vender'}</button><button class="edit-btn" onclick="openEdit(${p.id})">✏️</button><button class="del-btn" onclick="openDelete(${p.id})">🗑️</button></div></div>`;
+            }).join('');
+        }
+
+        function addToCart(id) {
+            const p = products.find(x => x.id === id);
+            if (!p || p.stock === 0) return;
+            const existing = cart.find(x => x.id === id);
+            if (existing) { if (existing.qty < p.stock) existing.qty++ }
+            else cart.push({ ...p, qty: 1 });
+            updateCart();
+        }
+
+        function removeFromCart(id) { cart = cart.filter(x => x.id !== id); updateCart() }
+        function updateQty(id, d) { const item = cart.find(x => x.id === id); const p = products.find(x => x.id === id); if (item) { item.qty += d; if (item.qty <= 0) removeFromCart(id); else if (item.qty > p.stock) item.qty = p.stock } updateCart() }
+
+        function updateCart() {
+            const container = document.getElementById('cartItems');
+            const total = cart.reduce((s, i) => s + i.price * i.qty, 0);
+            const count = cart.reduce((s, i) => s + i.qty, 0);
+            document.getElementById('cartCount').textContent = count;
+            document.getElementById('cartBadge').textContent = count;
+            document.getElementById('subtotal').textContent = formatPrice(total);
+            document.getElementById('total').textContent = formatPrice(total);
+            document.getElementById('checkoutBtn').disabled = cart.length === 0;
+            if (cart.length === 0) { container.innerHTML = '<div class="cart-empty"><div class="cart-empty-icon">🛒</div><p>El carrito está vacío</p></div>'; return }
+            container.innerHTML = cart.map(i => `<div class="cart-item"><img src="${i.image}" class="cart-item-img" onerror="this.src='https://via.placeholder.com/60'"><div class="cart-item-info"><div class="cart-item-name">${i.name}</div><div class="cart-item-price">${formatPrice(i.price)}</div><div class="cart-item-qty"><button class="qty-btn" onclick="updateQty(${i.id},-1)">−</button><span>${i.qty}</span><button class="qty-btn" onclick="updateQty(${i.id},1)">+</button></div></div><button class="cart-item-remove" onclick="removeFromCart(${i.id})">×</button></div>`).join('');
+        }
+
+        function openEdit(id) { const p = products.find(x => x.id === id); if (!p) return; document.getElementById('editId').value = p.id; document.getElementById('editName').value = p.name; document.getElementById('editSku').value = p.sku; document.getElementById('editCat').value = p.category; document.getElementById('editPrice').value = p.price; document.getElementById('editStock').value = p.stock; document.getElementById('editModal').classList.add('active') }
+        function closeEdit() { document.getElementById('editModal').classList.remove('active') }
+        function saveEdit(e) { e.preventDefault(); const id = parseInt(document.getElementById('editId').value); const idx = products.findIndex(p => p.id === id); if (idx !== -1) { products[idx] = { ...products[idx], name: document.getElementById('editName').value, sku: document.getElementById('editSku').value, category: document.getElementById('editCat').value, price: parseFloat(document.getElementById('editPrice').value), stock: parseInt(document.getElementById('editStock').value) }; localStorage.setItem('1807_products', JSON.stringify(products)); closeEdit(); render(); alert('✅ Producto actualizado') } }
+
+        function openDelete(id) { deleteId = id; document.getElementById('deleteModal').classList.add('active') }
+        function closeDelete() { document.getElementById('deleteModal').classList.remove('active'); deleteId = null }
+        function confirmDelete() { if (deleteId !== null) { products = products.filter(p => p.id !== deleteId); localStorage.setItem('1807_products', JSON.stringify(products)); closeDelete(); render(); alert('🗑️ Producto eliminado') } }
+
+        function openPayment() { const total = cart.reduce((s, i) => s + i.price * i.qty, 0); document.getElementById('cashTotal').textContent = formatPrice(total); document.getElementById('qrTotal').textContent = formatPrice(total); document.getElementById('transferTotal').textContent = formatPrice(total); document.getElementById('cashReceived').value = ''; calcChange(); document.getElementById('paymentModal').classList.add('active') }
+        function closePayment() { document.getElementById('paymentModal').classList.remove('active') }
+        function setPayment(m) { payMethod = m; document.querySelectorAll('.payment-tab').forEach((t, i) => t.classList.toggle('active', (m === 'cash' && i === 0) || (m === 'qr' && i === 1) || (m === 'transfer' && i === 2))); document.getElementById('cashPanel').style.display = m === 'cash' ? 'block' : 'none'; document.getElementById('qrPanel').style.display = m === 'qr' ? 'block' : 'none'; document.getElementById('transferPanel').style.display = m === 'transfer' ? 'block' : 'none' }
+        function calcChange() { const total = cart.reduce((s, i) => s + i.price * i.qty, 0); const received = parseFloat(document.getElementById('cashReceived').value) || 0; const change = received - total; const box = document.getElementById('changeBox'); const val = document.getElementById('changeValue'); if (received === 0) { val.textContent = '$0.00'; box.className = 'change-box ok' } else if (change < 0) { val.textContent = 'Falta ' + formatPrice(Math.abs(change)); box.className = 'change-box err' } else { val.textContent = formatPrice(change); box.className = 'change-box ok' } }
+        function confirmPay() { const total = cart.reduce((s, i) => s + i.price * i.qty, 0); if (payMethod === 'cash') { const received = parseFloat(document.getElementById('cashReceived').value) || 0; if (received < total) { alert('El monto recibido es insuficiente'); return } } cart.forEach(item => { const p = products.find(x => x.id === item.id); if (p) p.stock -= item.qty }); localStorage.setItem('1807_products', JSON.stringify(products)); genInvoice(); closePayment() }
+        function genInvoice() { const total = cart.reduce((s, i) => s + i.price * i.qty, 0); const num = 'INV-' + Date.now().toString().slice(-8); const date = new Date().toLocaleString(); const received = parseFloat(document.getElementById('cashReceived').value) || total; const change = Math.max(0, received - total); document.getElementById('invoiceContent').innerHTML = `<div class="invoice" id="invoicePrint"><div class="invoice-header"><div class="invoice-logo">1807.studio</div><div style="font-size:.85rem;color:#666">FACTURA DE VENTA</div><div style="font-size:.75rem;color:#999">${date}</div><div style="font-size:.75rem;margin-top:.5rem">N° ${num}</div></div><div style="margin:1rem 0"><div class="invoice-row" style="font-weight:600;border-bottom:1px solid #ddd;padding-bottom:.5rem"><span style="flex:1">Producto</span><span style="width:40px;text-align:center">Cant</span><span style="width:80px;text-align:right">Precio</span></div>${cart.map(i => `<div class="invoice-row"><span style="flex:1">${i.name}</span><span style="width:40px;text-align:center">${i.qty}</span><span style="width:80px;text-align:right">${formatPrice(i.price * i.qty)}</span></div>`).join('')}</div><div class="invoice-totals"><div class="invoice-row"><span>Subtotal:</span><span>${formatPrice(total)}</span></div><div class="invoice-row"><span>Impuesto:</span><span>$0.00</span></div><div class="invoice-row invoice-grand"><span>TOTAL:</span><span>${formatPrice(total)}</span></div>${payMethod === 'cash' ? `<div class="invoice-row"><span>Recibido:</span><span>${formatPrice(received)}</span></div><div class="invoice-row"><span>Cambio:</span><span>${formatPrice(change)}</span></div>` : ''}<div class="invoice-row"><span>Método:</span><span>${payMethod === 'cash' ? 'Efectivo' : payMethod === 'qr' ? 'QR' : 'Transferencia'}</span></div></div><div class="invoice-footer"><p>¡Gracias por su compra!</p><p>www.1807.studio</p></div></div>`; document.getElementById('invoiceModal').classList.add('active'); cart = []; updateCart(); render() }
+        function closeInvoice() { document.getElementById('invoiceModal').classList.remove('active') }
+        function printInvoice() { const content = document.getElementById('invoicePrint').innerHTML; const win = window.open('', '_blank'); win.document.write(`<html><head><title>Factura</title><style>body{font-family:'Courier New',monospace;padding:20px;max-width:400px;margin:0 auto}.invoice-row{display:flex;justify-content:space-between;padding:5px 0}.invoice-totals{border-top:2px dashed #000;padding-top:10px;margin-top:10px}.invoice-grand{font-weight:bold;font-size:18px;border-top:1px solid #000;margin-top:5px;padding-top:5px}.invoice-footer{text-align:center;margin-top:20px;border-top:2px dashed #000;padding-top:15px}</style></head><body>${content}</body></html>`); win.document.close(); win.print() }
+
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="1807.studio - Iniciar Sesión">
+    <title>1807.studio | Iniciar Sesión</title>
+    <link rel="icon" type="image/svg+xml"
+        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>👜</text></svg>">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-gold: #C9A962;
+            --primary-gold-dark: #9A7B3C;
+            --bg-dark: #0D0D0D;
+            --bg-card: #1A1A1A;
+            --text-primary: #FFFFFF;
+            --text-secondary: #B8B8B8;
+            --text-muted: #6B6B6B;
+            --danger: #F87171;
+            --success: #4ADE80;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            background: var(--bg-dark);
+            overflow: hidden;
+        }
+
+        .login-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1920&q=80') center/cover no-repeat;
+            z-index: 0;
+        }
+
+        .login-background::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(13, 13, 13, 0.85) 0%, rgba(13, 13, 13, 0.7) 50%, rgba(154, 123, 60, 0.3) 100%);
+        }
+
+        .login-container {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            width: 100%;
+            min-height: 100vh;
+        }
+
+        .login-left {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+        }
+
+        .login-branding {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .login-logo {
+            font-family: 'Playfair Display', serif;
+            font-size: 3.5rem;
+            font-weight: 700;
+            color: var(--primary-gold);
+            margin-bottom: 0.5rem;
+        }
+
+        .login-logo span {
+            color: var(--text-primary);
+            font-weight: 400;
+        }
+
+        .login-tagline {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .login-card {
+            background: rgba(26, 26, 26, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            padding: 3rem;
+            width: 100%;
+            max-width: 440px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+        }
+
+        .login-tabs {
+            display: flex;
+            margin-bottom: 2rem;
+            background: var(--bg-dark);
+            border-radius: 12px;
+            padding: 4px;
+        }
+
+        .login-tab {
+            flex: 1;
+            padding: 0.875rem;
+            border: none;
+            background: transparent;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .login-tab.active {
+            background: linear-gradient(135deg, var(--primary-gold), var(--primary-gold-dark));
+            color: var(--bg-dark);
+        }
+
+        .login-form {
+            display: none;
+        }
+
+        .login-form.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 1rem 1.25rem;
+            background: var(--bg-dark);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            color: var(--text-primary);
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary-gold);
+            box-shadow: 0 0 0 3px rgba(201, 169, 98, 0.15);
+        }
+
+        .form-input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .form-select {
+            width: 100%;
+            padding: 1rem 1.25rem;
+            background: var(--bg-dark);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            color: var(--text-primary);
+            font-size: 1rem;
+            cursor: pointer;
+        }
+
+        .form-select option {
+            background: var(--bg-dark);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .btn-login {
+            width: 100%;
+            padding: 1rem;
+            background: linear-gradient(135deg, var(--primary-gold), var(--primary-gold-dark));
+            border: none;
+            border-radius: 12px;
+            color: var(--bg-dark);
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 0.5rem;
+        }
+
+        .btn-login:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(201, 169, 98, 0.3);
+        }
+
+        .login-divider {
+            display: flex;
+            align-items: center;
+            margin: 1.5rem 0;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        .login-divider::before,
+        .login-divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .login-divider span {
+            padding: 0 1rem;
+        }
+
+        .role-selector {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .role-option {
+            position: relative;
+        }
+
+        .role-option input {
+            position: absolute;
+            opacity: 0;
+        }
+
+        .role-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 1rem;
+            background: var(--bg-dark);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .role-option input:checked+.role-card {
+            border-color: var(--primary-gold);
+            background: rgba(201, 169, 98, 0.1);
+        }
+
+        .role-card:hover {
+            border-color: rgba(201, 169, 98, 0.5);
+        }
+
+        .role-icon {
+            font-size: 1.75rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .role-name {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+        }
+
+        .login-footer {
+            text-align: center;
+            margin-top: 2rem;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        .login-footer a {
+            color: var(--primary-gold);
+            text-decoration: none;
+        }
+
+        .error-message {
+            background: rgba(248, 113, 113, 0.1);
+            border: 1px solid var(--danger);
+            color: var(--danger);
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            margin-bottom: 1rem;
+            display: none;
+        }
+
+        .success-message {
+            background: rgba(74, 222, 128, 0.1);
+            border: 1px solid var(--success);
+            color: var(--success);
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            margin-bottom: 1rem;
+            display: none;
+        }
+
+        .remember-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .checkbox-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+        }
+
+        .checkbox-wrapper input {
+            width: 18px;
+            height: 18px;
+            accent-color: var(--primary-gold);
+        }
+
+        .checkbox-wrapper span {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .forgot-link {
+            color: var(--primary-gold);
+            font-size: 0.85rem;
+            text-decoration: none;
+        }
+
+        .login-features {
+            position: absolute;
+            bottom: 2rem;
+            left: 2rem;
+            display: flex;
+            gap: 2rem;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        .feature-icon {
+            width: 40px;
+            height: 40px;
+            background: rgba(201, 169, 98, 0.2);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+        }
+
+        .feature-text {
+            font-size: 0.85rem;
+        }
+
+        @media (max-width: 768px) {
+            .login-card {
+                padding: 2rem;
+                margin: 1rem;
+            }
+
+            .login-features {
+                display: none;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .role-selector {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="login-background"></div>
+
+    <div class="login-container">
+        <div class="login-left">
+            <div class="login-branding">
+                <h1 class="login-logo">1807<span>.studio</span></h1>
+                <p class="login-tagline">Bolsos de Lujo & Elegancia</p>
+            </div>
+
+            <div class="login-card">
+                <div class="login-tabs">
+                    <button class="login-tab active" onclick="switchTab('login')">Iniciar Sesión</button>
+                    <button class="login-tab" onclick="switchTab('register')">Crear Cuenta</button>
+                </div>
+
+                <!-- LOGIN FORM -->
+                <form class="login-form active" id="loginForm" onsubmit="handleLogin(event)">
+                    <div id="loginError" class="error-message"></div>
+
+                    <div class="form-group">
+                        <label class="form-label">Correo Electrónico</label>
+                        <input type="email" class="form-input" id="loginEmail" placeholder="tu@email.com" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Contraseña</label>
+                        <input type="password" class="form-input" id="loginPassword" placeholder="••••••••" required>
+                    </div>
+
+                    <div class="remember-row">
+                        <label class="checkbox-wrapper">
+                            <input type="checkbox" id="rememberMe">
+                            <span>Recordarme</span>
+                        </label>
+                        <a href="#" class="forgot-link">¿Olvidaste tu contraseña?</a>
+                    </div>
+
+                    <button type="submit" class="btn-login">Iniciar Sesión</button>
+
+                    <div class="login-divider"><span>Acceso rápido</span></div>
+
+                    <div class="role-selector">
+                        <label class="role-option">
+                            <input type="radio" name="quickRole" value="admin" onclick="quickLogin('admin')">
+                            <div class="role-card">
+                                <span class="role-icon">👑</span>
+                                <span class="role-name">Admin</span>
+                            </div>
+                        </label>
+                        <label class="role-option">
+                            <input type="radio" name="quickRole" value="vendedor" onclick="quickLogin('vendedor')">
+                            <div class="role-card">
+                                <span class="role-icon">🛒</span>
+                                <span class="role-name">Vendedor</span>
+                            </div>
+                        </label>
+                        <label class="role-option">
+                            <input type="radio" name="quickRole" value="usuario" onclick="quickLogin('usuario')">
+                            <div class="role-card">
+                                <span class="role-icon">👤</span>
+                                <span class="role-name">Usuario</span>
+                            </div>
+                        </label>
+                    </div>
+                </form>
+
+                <!-- REGISTER FORM -->
+                <form class="login-form" id="registerForm" onsubmit="handleRegister(event)">
+                    <div id="registerError" class="error-message"></div>
+                    <div id="registerSuccess" class="success-message"></div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Nombre</label>
+                            <input type="text" class="form-input" id="regName" placeholder="Juan" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Apellido</label>
+                            <input type="text" class="form-input" id="regLastName" placeholder="Pérez" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Correo Electrónico</label>
+                        <input type="email" class="form-input" id="regEmail" placeholder="tu@email.com" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Contraseña</label>
+                        <input type="password" class="form-input" id="regPassword" placeholder="Mínimo 6 caracteres"
+                            minlength="6" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Tipo de Cuenta</label>
+                        <div class="role-selector">
+                            <label class="role-option">
+                                <input type="radio" name="regRole" value="usuario" checked>
+                                <div class="role-card">
+                                    <span class="role-icon">👤</span>
+                                    <span class="role-name">Usuario</span>
+                                </div>
+                            </label>
+                            <label class="role-option">
+                                <input type="radio" name="regRole" value="vendedor">
+                                <div class="role-card">
+                                    <span class="role-icon">🛒</span>
+                                    <span class="role-name">Vendedor</span>
+                                </div>
+                            </label>
+                            <label class="role-option">
+                                <input type="radio" name="regRole" value="admin">
+                                <div class="role-card">
+                                    <span class="role-icon">👑</span>
+                                    <span class="role-name">Admin</span>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-login">Crear Cuenta</button>
+                </form>
+
+                <p class="login-footer">
+                    Al continuar, aceptas nuestros <a href="#">Términos</a> y <a href="#">Política de Privacidad</a>
+                </p>
+            </div>
+        </div>
+
+        <div class="login-features">
+            <div class="feature-item">
+                <div class="feature-icon">🔒</div>
+                <span class="feature-text">Conexión Segura</span>
+            </div>
+            <div class="feature-item">
+                <div class="feature-icon">⚡</div>
+                <span class="feature-text">Acceso Rápido</span>
+            </div>
+            <div class="feature-item">
+                <div class="feature-icon">📱</div>
+                <span class="feature-text">Multi-dispositivo</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Usuarios por defecto
+        const defaultUsers = [
+            { email: 'admin@1807.studio', password: 'admin123', name: 'Administrador', role: 'admin' },
+            { email: 'vendedor@1807.studio', password: 'vendedor123', name: 'Vendedor', role: 'vendedor' },
+            { email: 'usuario@1807.studio', password: 'usuario123', name: 'Usuario', role: 'usuario' }
+        ];
+
+        // Inicializar usuarios si no existen
+        if (!localStorage.getItem('1807_users')) {
+            localStorage.setItem('1807_users', JSON.stringify(defaultUsers));
+        }
+
+        function switchTab(tab) {
+            document.querySelectorAll('.login-tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.login-form').forEach(f => f.classList.remove('active'));
+
+            if (tab === 'login') {
+                document.querySelectorAll('.login-tab')[0].classList.add('active');
+                document.getElementById('loginForm').classList.add('active');
+            } else {
+                document.querySelectorAll('.login-tab')[1].classList.add('active');
+                document.getElementById('registerForm').classList.add('active');
+            }
+        }
+
+        function handleLogin(e) {
+            e.preventDefault();
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            const errorEl = document.getElementById('loginError');
+
+            const users = JSON.parse(localStorage.getItem('1807_users') || '[]');
+            const user = users.find(u => u.email === email && u.password === password);
+
+            if (user) {
+                localStorage.setItem('1807_currentUser', JSON.stringify(user));
+
+                // Redirigir según rol
+                if (user.role === 'admin') {
+                    window.location.href = 'index.html';
+                } else if (user.role === 'vendedor') {
+                    window.location.href = 'tienda.html';
+                } else {
+                    window.location.href = 'tienda.html';
+                }
+            } else {
+                errorEl.textContent = 'Email o contraseña incorrectos';
+                errorEl.style.display = 'block';
+            }
+        }
+
+        function handleRegister(e) {
+            e.preventDefault();
+            const name = document.getElementById('regName').value + ' ' + document.getElementById('regLastName').value;
+            const email = document.getElementById('regEmail').value;
+            const password = document.getElementById('regPassword').value;
+            const role = document.querySelector('input[name="regRole"]:checked').value;
+
+            const errorEl = document.getElementById('registerError');
+            const successEl = document.getElementById('registerSuccess');
+
+            const users = JSON.parse(localStorage.getItem('1807_users') || '[]');
+
+            if (users.find(u => u.email === email)) {
+                errorEl.textContent = 'Este email ya está registrado';
+                errorEl.style.display = 'block';
+                successEl.style.display = 'none';
+                return;
+            }
+
+            users.push({ email, password, name, role });
+            localStorage.setItem('1807_users', JSON.stringify(users));
+
+            errorEl.style.display = 'none';
+            successEl.textContent = '¡Cuenta creada exitosamente! Ahora puedes iniciar sesión.';
+            successEl.style.display = 'block';
+
+            setTimeout(() => switchTab('login'), 2000);
+        }
+
+        function quickLogin(role) {
+            const users = JSON.parse(localStorage.getItem('1807_users') || '[]');
+            const user = users.find(u => u.role === role);
+
+            if (user) {
+                localStorage.setItem('1807_currentUser', JSON.stringify(user));
+
+                if (role === 'admin') {
+                    window.location.href = 'index.html';
+                } else {
+                    window.location.href = 'tienda.html';
+                }
+            }
+        }
+
+        // Verificar si ya hay sesión
+        const currentUser = localStorage.getItem('1807_currentUser');
+        if (currentUser) {
+            const user = JSON.parse(currentUser);
+            if (user.role === 'admin') {
+                // window.location.href = 'index.html';
+            }
+        }
+    </script>
+</body>
+
+</html>
