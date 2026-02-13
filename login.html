@@ -35,7 +35,8 @@
             min-height: 100vh;
             display: flex;
             background: var(--bg-dark);
-            overflow: hidden;
+            overflow-x: hidden;
+            overflow-y: auto;
         }
 
         .login-background {
@@ -396,9 +397,24 @@
         }
 
         @media (max-width: 768px) {
+            .login-left {
+                padding: 1rem;
+                justify-content: flex-start;
+                padding-top: 2rem;
+            }
+
+            .login-branding {
+                margin-bottom: 2rem;
+            }
+
+            .login-logo {
+                font-size: 2.5rem;
+            }
+
             .login-card {
-                padding: 2rem;
-                margin: 1rem;
+                padding: 1.5rem;
+                margin: 0;
+                border-radius: 20px;
             }
 
             .login-features {
@@ -410,7 +426,28 @@
             }
 
             .role-selector {
-                grid-template-columns: 1fr;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 0.5rem;
+            }
+
+            .role-card {
+                padding: 0.75rem 0.5rem;
+            }
+
+            .role-icon {
+                font-size: 1.25rem;
+            }
+
+            .role-name {
+                font-size: 0.6rem;
+            }
+
+            .login-tabs {
+                margin-bottom: 1.5rem;
+            }
+
+            .btn-login {
+                padding: 0.875rem;
             }
         }
     </style>
