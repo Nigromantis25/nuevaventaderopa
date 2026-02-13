@@ -100,7 +100,8 @@ function renderSection(section) {
         sales: renderSalesSection,
         clients: renderClientsSection,
         reports: renderReportsSection,
-        settings: renderSettingsSection
+        settings: renderSettingsSection,
+        users: renderUsersSection
     };
     mainContent.innerHTML = sections[section] ? sections[section]() : renderDashboard();
     if (section === 'dashboard' || section === 'products') initProductEvents();
@@ -131,8 +132,20 @@ function renderDashboard() {
             <div class="stat-card"><div class="stat-icon gold">💰</div><div class="stat-value">${formatPrice(totalValue)}</div><div class="stat-label">Valor Inventario</div></div>
             <div class="stat-card"><div class="stat-icon green">📦</div><div class="stat-value">${products.length}</div><div class="stat-label">Productos</div></div>
             <div class="stat-card"><div class="stat-icon blue">📋</div><div class="stat-value">${pendingOrders}</div><div class="stat-label">Pedidos Pendientes</div></div>
-            <div class="stat-card"><div class="stat-icon red">⚠️</div><div class="stat-value">${lowStock}</div><div class="stat-label">Stock Bajo</div></div>
+            <div class="stat-card" onclick="navigateTo('users')" style="cursor: pointer;"><div class="stat-icon red">⚠️</div><div class="stat-value">${lowStock}</div><div class="stat-label">Stock Bajo</div></div>
+            <div class="stat-card" onclick="navigateTo('users')" style="cursor: pointer;"><div class="stat-icon purple">👤</div><div class="stat-value">${JSON.parse(localStorage.getItem('1807_users') || '[]').length}</div><div class="stat-label">Usuarios Reg.</div></div>
         </div>
+        
+        ${lowStock > 0 ? `
+        <div class="alert-banner low-stock-alert">
+            <div class="alert-icon">⚠️</div>
+            <div class="alert-message">
+                <strong>Atención:</strong> Tienes ${lowStock} productos con stock crítico. 
+                <span class="low-stock-list">${products.filter(p => p.stock < 5).map(p => p.name).slice(0, 3).join(', ')}${lowStock > 3 ? '...' : ''}</span>
+            </div>
+            <button class="btn btn-sm btn-outline-light" onclick="filterLowStock()">Ver Todo</button>
+        </div>` : ''}
+
         <section class="products-section">
             <div class="products-header">
                 <h2 class="products-title">Inventario de Productos</h2>
@@ -166,8 +179,14 @@ function renderProductsTable() {
         return `<tr>
                 <td><div class="product-cell"><img src="${p.image}" class="product-image" onerror="this.src='https://via.placeholder.com/60'"><div class="product-info"><h4>${p.name}</h4></div></div></td>
                 <td>${p.sku}</td><td>${p.category}</td><td class="product-price">${formatPrice(p.price)}</td>
-                <td><span class="stock-indicator ${status.class}"></span> ${p.stock}</td>
-                <td><button class="action-btn edit" onclick="editProduct(${p.id})">✏️</button><button class="action-btn delete" onclick="openDeleteModal(${p.id})">🗑️</button></td>
+                <td>
+                    <div class="stock-control">
+                        <button class="stock-btn minus" onclick="updateStock('${p.id}', -1)">-</button>
+                        <span class="stock-value"><span class="stock-indicator ${status.class}"></span> ${p.stock}</span>
+                        <button class="stock-btn plus" onclick="updateStock('${p.id}', 1)">+</button>
+                    </div>
+                </td>
+                <td><button class="action-btn edit" onclick="editProduct('${p.id}')">✏️</button><button class="action-btn delete" onclick="openDeleteModal('${p.id}')">🗑️</button></td>
             </tr>`;
     }).join('')}</tbody></table>`;
 }
@@ -185,15 +204,28 @@ function openProductModal(id = null) {
     document.getElementById('modalTitle').textContent = id ? 'Editar Producto' : 'Agregar Nuevo Producto';
 
     if (id) {
-        const p = products.find(x => x.id === id);
+        // Buscar por ID (pudiendo ser string o número)
+        const p = products.find(x => String(x.id) === String(id));
         if (p) {
+            document.getElementById('productId').value = p.id;
             document.getElementById('productName').value = p.name;
             document.getElementById('productCategory').value = p.category;
             document.getElementById('productSku').value = p.sku;
             document.getElementById('productPrice').value = p.price;
             document.getElementById('productStock').value = p.stock;
             document.getElementById('productDescription').value = p.description || '';
+
+            if (p.image) {
+                document.getElementById('previewImg').src = p.image;
+                document.getElementById('imagePreview').classList.add('active');
+                document.getElementById('imageUploadArea').style.display = 'none';
+            }
         }
+    } else {
+        document.getElementById('productId').value = '';
+        document.getElementById('previewImg').src = '';
+        document.getElementById('imagePreview').classList.remove('active');
+        document.getElementById('imageUploadArea').style.display = 'block';
     }
     modal.classList.add('active');
 }
@@ -205,31 +237,38 @@ function closeDeleteModal() { document.getElementById('deleteModal').classList.r
 
 function saveProduct(e) {
     e.preventDefault();
+    const productId = document.getElementById('productId').value;
     const data = {
         name: document.getElementById('productName').value,
         category: document.getElementById('productCategory').value,
-        sku: document.getElementById('productSku').value,
+        sku: document.getElementById('productSku').value || `SKU-${Date.now()}`,
         price: parseFloat(document.getElementById('productPrice').value),
         stock: parseInt(document.getElementById('productStock').value),
         description: document.getElementById('productDescription').value,
-        image: 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=400&h=400&fit=crop'
+        image: document.getElementById('previewImg').src || 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=400&h=400&fit=crop'
     };
 
-    if (currentEditId) {
-        const idx = products.findIndex(p => p.id === currentEditId);
-        if (idx !== -1) products[idx] = { ...products[idx], ...data };
-        showToast('Producto actualizado');
+    if (productId && productId !== "") {
+        // Buscar por ID (string o número) o por SKU
+        const idx = products.findIndex(p => String(p.id) === String(productId) || p.sku === productId);
+        if (idx !== -1) {
+            products[idx] = { ...products[idx], ...data };
+            showToast('✅ Producto actualizado correctamente');
+        }
     } else {
-        products.push({ id: generateId(), ...data });
-        showToast('Producto agregado');
+        const newProduct = { id: generateId(), ...data };
+        products.push(newProduct);
+        showToast('📦 Nuevo producto agregado con éxito');
     }
+
+    // Sincronización crucial con localStorage
     localStorage.setItem('1807_products', JSON.stringify(products));
     closeProductModal();
     renderSection(currentSection);
 }
 
 function deleteProduct() {
-    products = products.filter(p => p.id !== deleteProductId);
+    products = products.filter(p => String(p.id) !== String(deleteProductId));
     localStorage.setItem('1807_products', JSON.stringify(products));
     showToast('Producto eliminado');
     closeDeleteModal();
@@ -241,6 +280,32 @@ function exportProducts() {
     const blob = new Blob([csv], { type: 'text/csv' });
     const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = '1807_productos.csv'; a.click();
     showToast('Productos exportados');
+}
+
+function updateStock(id, delta) {
+    const idx = products.findIndex(p => String(p.id) === String(id));
+    if (idx !== -1) {
+        const newStock = products[idx].stock + delta;
+        if (newStock >= 0) {
+            products[idx].stock = newStock;
+            localStorage.setItem('1807_products', JSON.stringify(products));
+            renderSection(currentSection);
+            if (delta > 0) showToast('Stock incrementado');
+            else showToast('Stock disminuido', 'warning');
+        } else {
+            showToast('El stock no puede ser negativo', 'error');
+        }
+    }
+}
+
+function filterLowStock() {
+    navigateTo('dashboard');
+    const searchInput = document.getElementById('searchInput');
+    if (searchInput) {
+        // En un sistema real, esto aplicaría un filtro específico. 
+        // Aquí simplemente mostraremos un toast informativo por ahora.
+        showToast('Mostrando productos con bajo stock');
+    }
 }
 
 // ========================================
@@ -340,6 +405,82 @@ function renderSettingsSection() {
 }
 
 // ========================================
+// USUARIOS (ADMIN ONLY)
+// ========================================
+function renderUsersSection() {
+    const allUsers = JSON.parse(localStorage.getItem('1807_users')) || [];
+
+    return `
+        <div class="dashboard-header">
+            <div>
+                <h1 class="dashboard-title">Registro de Cuentas</h1>
+                <p class="dashboard-subtitle">Listado de todos los usuarios registrados en el sistema.</p>
+            </div>
+        </div>
+        
+        <div class="users-container">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon blue">👥</div>
+                    <div class="stat-value">${allUsers.length}</div>
+                    <div class="stat-label">Total Usuarios</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon gold">👑</div>
+                    <div class="stat-value">${allUsers.filter(u => u.role === 'admin').length}</div>
+                    <div class="stat-label">Administradores</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon green">🛒</div>
+                    <div class="stat-value">${allUsers.filter(u => u.role === 'vendedor').length}</div>
+                    <div class="stat-label">Vendedores</div>
+                </div>
+            </div>
+
+            <section class="products-section" style="margin-top: 2rem;">
+                <table class="products-table">
+                    <thead>
+                        <tr>
+                            <th>Usuario</th>
+                            <th>Email</th>
+                            <th>Rol</th>
+                            <th>Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${allUsers.map(u => `
+                            <tr>
+                                <td>
+                                    <div class="product-cell">
+                                        <div class="user-avatar" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; background: var(--primary-gold); color: var(--bg-dark); border-radius: 8px; font-weight: bold; margin-right: 1rem;">
+                                            ${u.name ? u.name[0].toUpperCase() : 'U'}
+                                        </div>
+                                        <div class="product-info">
+                                            <h4>${u.name || 'Sin nombre'}</h4>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>${u.email}</td>
+                                <td>
+                                    <span class="sidebar-badge" style="position: static; padding: 0.25rem 0.75rem; background: ${u.role === 'admin' ? 'rgba(201, 169, 98, 0.2)' : 'rgba(255, 255, 255, 0.1)'}; color: ${u.role === 'admin' ? 'var(--primary-gold)' : 'var(--text-secondary)'}">
+                                        ${u.role.toUpperCase()}
+                                    </span>
+                                </td>
+                                <td>
+                                    <span style="color: var(--success); display: flex; align-items: center; gap: 0.5rem;">
+                                        <span style="width: 8px; height: 8px; background: var(--success); border-radius: 50%;"></span>
+                                        Activo
+                                    </span>
+                                </td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            </section>
+        </div>`;
+}
+
+// ========================================
 // CLIENTES
 // ========================================
 function openClientModal() { document.getElementById('clientModal').classList.add('active'); }
@@ -369,9 +510,10 @@ const chatResponses = {
     products: () => `Estos son nuestros productos disponibles:\n\n${products.filter(p => p.stock > 0).map(p => `• ${p.name} - ${formatPrice(p.price)}`).join('\n')}\n\n¿Te interesa alguno en particular?`,
     prices: () => `💰 Lista de precios:\n\n${products.map(p => `${p.name}: ${formatPrice(p.price)}`).join('\n')}`,
     buy: "¡Excelente elección! Para confirmar tu compra, escribe 'CONFIRMAR COMPRA' seguido del nombre del producto.",
-    confirm: (product) => { triggerSaleAlert(product); return `✅ ¡Compra confirmada!\n\nProducto: ${product.name}\nPrecio: ${formatPrice(product.price)}\n\nUn asesor te contactará en breve para coordinar el pago y envío.`; },
+    confirm: (product) => { triggerSaleAlert(product); return `✅ ¡Compra confirmada!\n\nProducto: ${product.name}\nPrecio: ${formatPrice(product.price)}\n\n🚀 Te estamos redirigiendo a nuestro WhatsApp oficial (78810097) para finalizar tu pedido.`; },
+    whatsapp: "📱 Puedes contactarnos directamente por WhatsApp haciendo clic aquí: [Contactar al 78810097](https://wa.me/59178810097?text=Hola,%20quisiera%20consultar%20sobre%20tus%20productos)",
     categories: "📂 Nuestras categorías:\n• Bolsos de mano\n• Carteras\n• Mochilas\n• Clutch\n• Tote\n\n¿Qué tipo de bolso buscas?",
-    help: "Puedo ayudarte con:\n• Ver productos disponibles\n• Consultar precios\n• Realizar una compra\n• Información sobre categorías\n\n¿Qué necesitas?"
+    help: "Puedo ayudarte con:\n• Ver productos disponibles\n• Consultar precios\n• Realizar una compra\n• Contactar por WhatsApp\n• Información sobre categorías\n\n¿Qué necesitas?"
 };
 
 function toggleChatbot() {
@@ -406,6 +548,7 @@ function processChat(input) {
     if (text.includes('producto') || text.includes('catalogo') || text.includes('ver')) return chatResponses.products();
     if (text.includes('precio') || text.includes('costo') || text.includes('cuanto')) return chatResponses.prices();
     if (text.includes('comprar') || text.includes('quiero') || text.includes('ordenar')) return chatResponses.buy;
+    if (text.includes('whatsapp') || text.includes('contacto') || text.includes('vendedor') || text.includes('telefono')) return chatResponses.whatsapp;
     if (text.includes('categoria') || text.includes('tipo')) return chatResponses.categories;
     if (text.includes('ayuda') || text.includes('help')) return chatResponses.help;
 
@@ -445,6 +588,20 @@ function triggerSaleAlert(product) {
     // Agregar a órdenes
     orders.push({ id: `ORD-${Date.now()}`, clientName: "Cliente Chat", clientEmail: "chat@cliente.com", items: [{ name: product.name, qty: 1, price: product.price }], total: product.price, status: "pending", date: new Date().toISOString().split('T')[0] });
     localStorage.setItem('1807_orders', JSON.stringify(orders));
+
+    // Redirección a WhatsApp con alerta para el vendedor
+    const message = `🚨 *NUEVO PEDIDO DESDE EL CHATBOT*\n\n` +
+        `*Producto:* ${product.name}\n` +
+        `*Precio:* ${formatPrice(product.price)}\n` +
+        `*Fecha:* ${new Date().toLocaleString()}\n\n` +
+        `_Hola, confirmo que quiero este producto. Por favor, contácteme._`;
+
+    const encodedMessage = encodeURIComponent(message);
+    const whatsappUrl = `https://wa.me/59178810097?text=${encodedMessage}`;
+
+    setTimeout(() => {
+        window.open(whatsappUrl, '_blank');
+    }, 2000);
 }
 
 function closeSaleAlert() { document.getElementById('saleAlertModal').classList.remove('active'); }
@@ -495,12 +652,92 @@ document.addEventListener('DOMContentLoaded', () => {
     // Cerrar modales con click fuera
     document.querySelectorAll('.modal-overlay').forEach(m => m.addEventListener('click', (e) => { if (e.target === m) m.classList.remove('active'); }));
 
-    // Render inicial
+    // Gestión de Carga de Imágenes
+    const imageUploadArea = document.getElementById('imageUploadArea');
+    const imageInput = document.getElementById('imageInput');
+    const imagePreview = document.getElementById('imagePreview');
+    const previewImg = document.getElementById('previewImg');
+    const removeImage = document.getElementById('removeImage');
+
+    if (imageUploadArea && imageInput) {
+        imageUploadArea.addEventListener('click', () => imageInput.click());
+
+        imageInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    previewImg.src = event.target.result;
+                    imagePreview.classList.add('active');
+                    imageUploadArea.style.display = 'none';
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Drag & Drop
+        imageUploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            imageUploadArea.style.borderColor = 'var(--primary-gold)';
+            imageUploadArea.style.background = 'rgba(201, 169, 98, 0.1)';
+        });
+
+        imageUploadArea.addEventListener('dragleave', () => {
+            imageUploadArea.style.borderColor = 'rgba(255, 255, 255, 0.1)';
+            imageUploadArea.style.background = 'transparent';
+        });
+
+        imageUploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            imageUploadArea.style.borderColor = 'rgba(255, 255, 255, 0.1)';
+            imageUploadArea.style.background = 'transparent';
+
+            const file = e.dataTransfer.files[0];
+            if (file && file.type.startsWith('image/')) {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    previewImg.src = event.target.result;
+                    imagePreview.classList.add('active');
+                    imageUploadArea.style.display = 'none';
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    }
+
+    if (removeImage) {
+        removeImage.addEventListener('click', () => {
+            previewImg.src = '';
+            imagePreview.classList.remove('active');
+            imageUploadArea.style.display = 'block';
+            imageInput.value = '';
+        });
+    }
+
+    // Menú Móvil - Dashboard
+    const navbar = document.getElementById('navbar');
+    const sidebar = document.getElementById('sidebar');
+    const mobileToggle = document.createElement('button');
+    mobileToggle.className = 'mobile-toggle';
+    mobileToggle.innerHTML = `
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
+        </svg>`;
+
+    if (navbar) {
+        navbar.prepend(mobileToggle);
+        mobileToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('active');
+            document.querySelector('.navbar-nav')?.classList.toggle('active');
+        });
+    }
+
+    // Render inicial - RESTAURADO
     loadUserInfo();
     renderSection('dashboard');
     updateBadges();
 
-    console.log('🛍️ 1807.studio initialized with Chatbot IA');
+    console.log('🛍️ 1807.studio initialized with Chatbot IA & Responsive Engine');
 });
 
 // Exponer funciones globales
@@ -516,4 +753,6 @@ window.completeOrder = completeOrder;
 window.viewOrderDetails = viewOrderDetails;
 window.navigateTo = navigateTo;
 window.logout = logout;
+window.updateStock = updateStock;
+window.filterLowStock = filterLowStock;
 

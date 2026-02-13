@@ -821,34 +821,79 @@
         }
 
         @media(max-width:992px) {
+            .container {
+                flex-direction: column;
+            }
+
             .cart-panel {
                 position: fixed;
                 right: -100%;
                 top: 70px;
                 height: calc(100vh - 70px);
                 transition: right .3s;
-                z-index: 99;
+                z-index: 1000;
                 width: 100%;
-                max-width: 400px
+                max-width: 400px;
+                box-shadow: -10px 0 30px rgba(0, 0, 0, 0.5);
             }
 
             .cart-panel.active {
                 right: 0
             }
+
+            .products-panel {
+                max-height: none;
+                overflow: visible;
+            }
         }
 
-        @media(max-width:576px) {
+        @media(max-width:768px) {
+            .header {
+                padding: 0 1rem;
+            }
+
+            .logo {
+                font-size: 1.2rem;
+            }
+
+            .user-info span,
+            .user-info #userName {
+                display: none;
+            }
+
+            .products-grid {
+                grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+                gap: 1rem;
+            }
+        }
+
+        @media(max-width:480px) {
             .products-grid {
                 grid-template-columns: repeat(2, 1fr);
-                gap: .75rem
+                gap: 0.5rem;
             }
 
-            .product-image {
-                height: 140px
+            .product-card {
+                border-radius: 12px;
             }
 
-            .form-row {
-                grid-template-columns: 1fr
+            .product-info {
+                padding: 0.75rem;
+            }
+
+            .product-name {
+                font-size: 0.9rem;
+                height: 2.4em;
+                overflow: hidden;
+            }
+
+            .product-price {
+                font-size: 1rem;
+            }
+
+            .add-btn {
+                padding: 0.5rem;
+                font-size: 0.75rem;
             }
         }
 
@@ -863,11 +908,16 @@
             border: none;
             border-radius: 50%;
             cursor: pointer;
-            z-index: 98;
+            z-index: 999;
             box-shadow: 0 8px 25px rgba(201, 169, 98, .4);
             font-size: 1.5rem;
             align-items: center;
-            justify-content: center
+            justify-content: center;
+            transition: transform 0.3s;
+        }
+
+        .cart-toggle:active {
+            transform: scale(0.9);
         }
 
         .cart-toggle-badge {
@@ -883,7 +933,8 @@
             font-weight: 700;
             display: flex;
             align-items: center;
-            justify-content: center
+            justify-content: center;
+            border: 2px solid var(--bg);
         }
 
         @media(max-width:992px) {
@@ -913,13 +964,12 @@
     <div class="container">
         <div class="products-panel">
             <h1 class="title" id="pageTitle">🛍️ Catálogo de Productos</h1>
-            <p class="subtitle">Explora nuestra colección de bolsos exclusivos por categoría</p>
+            <p class="subtitle">Explora nuestra colección de bolsos exclusivos</p>
 
             <div class="vendor-panel" id="vendorPanel" style="display:none">
-                <div class="vendor-header"
-                    onclick="document.getElementById('vendorList').style.display=document.getElementById('vendorList').style.display==='none'?'block':'none'">
+                <div class="vendor-header" onclick="toggleVendorList()">
                     <h3>📋 Lista Rápida para Venta</h3>
-                    <span>▼</span>
+                    <span id="vendorArrow">▼</span>
                 </div>
                 <div class="vendor-list" id="vendorList"></div>
             </div>
@@ -934,7 +984,11 @@
         <div class="cart-panel" id="cartPanel">
             <div class="cart-header">
                 <h2 class="cart-title">🛒 Carrito <span class="cart-count" id="cartCount">0</span></h2>
-                <button class="clear-cart" onclick="cart=[];updateCart()">Vaciar</button>
+                <div style="display: flex; gap: 0.5rem; align-items: center;">
+                    <button class="clear-cart" onclick="cart=[];updateCart()">Vaciar</button>
+                    <button class="modal-close" id="closeCartBtn" style="display: none;"
+                        onclick="document.getElementById('cartPanel').classList.remove('active')">×</button>
+                </div>
             </div>
             <div class="cart-items" id="cartItems">
                 <div class="cart-empty">
@@ -1106,76 +1160,161 @@
         if (products.length === 0) { products = sampleProducts; localStorage.setItem('1807_products', JSON.stringify(products)) }
 
         let cart = [], currentUser = JSON.parse(localStorage.getItem('1807_currentUser')), deleteId = null, payMethod = 'cash';
-        const categories = ['Bolso de mano', 'Cartera', 'Mochila', 'Clutch', 'Tote'];
-        const icons = { 'Bolso de mano': '👜', 'Cartera': '💼', 'Mochila': '🎒', 'Clutch': '👛', 'Tote': '🛍️' };
+        const icons = { 'Bolso de mano': '👜', 'Cartera': '💼', 'Mochila': '🎒', 'Clutch': '👛', 'Tote': '🛍️', 'Default': '📦' };
 
         if (!currentUser) window.location.href = 'login.html';
 
         function init() {
             document.getElementById('userName').textContent = currentUser.name;
-            document.getElementById('userRole').textContent = currentUser.role === 'vendedor' ? 'Vendedor' : 'Cliente';
+            document.getElementById('userRole').textContent = currentUser.role === 'admin' ? 'Administrador' : (currentUser.role === 'vendedor' ? 'Vendedor' : 'Cliente');
             document.getElementById('userAvatar').textContent = currentUser.name[0].toUpperCase();
+
             if (currentUser.role === 'admin') {
                 document.getElementById('adminLink').style.display = 'flex';
                 document.getElementById('vendorPanel').style.display = 'block';
                 document.getElementById('pageTitle').textContent = '📊 Administración de Productos';
-            }
-            if (currentUser.role === 'vendedor') {
+            } else if (currentUser.role === 'vendedor') {
                 document.getElementById('vendorPanel').style.display = 'block';
                 document.getElementById('pageTitle').textContent = '📋 Punto de Venta';
             }
+
+            if (window.innerWidth <= 992) {
+                document.getElementById('closeCartBtn').style.display = 'block';
+            }
+
             render();
         }
 
         function logout() { localStorage.removeItem('1807_currentUser'); window.location.href = 'login.html' }
         function formatPrice(p) { return new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'USD' }).format(p) }
 
+        function toggleVendorList() {
+            const list = document.getElementById('vendorList');
+            const arrow = document.getElementById('vendorArrow');
+            const isHidden = list.style.display === 'none';
+            list.style.display = isHidden ? 'block' : 'none';
+            arrow.textContent = isHidden ? '▲' : '▼';
+        }
+
         function render() {
             const search = document.getElementById('searchInput').value.toLowerCase();
             const isAdmin = currentUser && currentUser.role === 'admin';
+
+            // Forzar carga de productos si el array está vacío (redundancia de seguridad)
+            if (products.length === 0) {
+                products = JSON.parse(localStorage.getItem('1807_products')) || sampleProducts;
+            }
+
+            // Obtener categorías dinámicas de los productos actuales
+            const dynamicCategories = [...new Set(products.map(p => p.category))].sort();
+
             let html = '';
 
-            categories.forEach(cat => {
-                const prods = products.filter(p => p.category === cat && (!search || p.name.toLowerCase().includes(search) || p.description.toLowerCase().includes(search)));
-                html += `<div class="category-section"><div class="category-header"><h2 class="category-title">${icons[cat] || '📦'} ${cat}</h2><span class="category-count">${prods.length} productos</span></div>`;
+            dynamicCategories.forEach(cat => {
+                const prods = products.filter(p => p.category === cat && (!search || p.name.toLowerCase().includes(search) || (p.description && p.description.toLowerCase().includes(search))));
+
                 if (prods.length > 0) {
-                    html += '<div class="products-grid">';
+                    html += `<div class="category-section">
+                                <div class="category-header">
+                                    <h2 class="category-title">${icons[cat] || icons['Default']} ${cat}</h2>
+                                    <span class="category-count">${prods.length} productos</span>
+                                </div>
+                                <div class="products-grid">`;
+
                     prods.forEach(p => {
                         const sc = p.stock === 0 ? 'out' : p.stock < 5 ? 'low' : 'in';
                         const st = p.stock === 0 ? 'Agotado' : p.stock < 5 ? 'Poco stock' : p.stock + ' disp.';
-                        html += `<div class="product-card"><img src="${p.image}" class="product-image" onerror="this.src='https://via.placeholder.com/240x180/1a1a1a/666?text=Producto'"><div class="product-info"><h3 class="product-name">${p.name}</h3><p class="product-desc">${p.description || ''}</p><div class="product-bottom"><span class="product-price">${formatPrice(p.price)}</span><span class="product-stock stock-${sc}">${st}</span></div><div class="product-actions"><button class="add-btn" onclick="addToCart(${p.id})" ${p.stock === 0 ? 'disabled' : ''}>${p.stock === 0 ? 'Sin Stock' : '🛒 Agregar'}</button>${isAdmin ? `<button class="edit-btn" onclick="openEdit(${p.id})">✏️</button><button class="del-btn" onclick="openDelete(${p.id})">🗑️</button>` : ''}</div></div></div>`;
+                        const pId = p.id || p.sku;
+
+                        html += `
+                            <div class="product-card">
+                                <img src="${p.image}" class="product-image" onerror="this.src='https://via.placeholder.com/240x180/1a1a1a/666?text=Producto'">
+                                <div class="product-info">
+                                    <h3 class="product-name">${p.name}</h3>
+                                    <p class="product-desc">${p.description || ''}</p>
+                                    <div class="product-bottom">
+                                        <span class="product-price">${formatPrice(p.price)}</span>
+                                        <span class="product-stock stock-${sc}">${st}</span>
+                                    </div>
+                                    <div class="product-actions">
+                                        <button class="add-btn" onclick="addToCart(${typeof pId === 'number' ? pId : `'${pId}'`})" ${p.stock === 0 ? 'disabled' : ''}>
+                                            ${p.stock === 0 ? 'Sin Stock' : '🛒 Comprar'}
+                                        </button>
+                                        ${isAdmin ? `
+                                            <button class="edit-btn" onclick="openEdit(${typeof pId === 'number' ? pId : `'${pId}'`})">✏️</button>
+                                            <button class="del-btn" onclick="openDelete(${typeof pId === 'number' ? pId : `'${pId}'`})">🗑️</button>
+                                        ` : ''}
+                                    </div>
+                                </div>
+                            </div>`;
                     });
-                    html += '</div>';
-                } else {
-                    html += '<div style="text-align:center;padding:2rem;color:var(--text-sec);background:var(--bg-card);border-radius:12px;border:1px dashed rgba(255,255,255,.1)">No hay productos en esta categoría</div>';
+                    html += '</div></div>';
                 }
-                html += '</div>';
             });
 
+            if (html === '') {
+                html = '<div style="text-align:center;padding:4rem;color:var(--text-sec);background:var(--bg-card);border-radius:20px;border:1px dashed rgba(255,255,255,.1)"><h3>No se encontraron productos</h3><p>Intenta con otra búsqueda</p></div>';
+            }
+
             document.getElementById('categoriesContainer').innerHTML = html;
-            if (isAdmin) renderVendorList(search);
+            if (isAdmin || currentUser.role === 'vendedor') renderVendorList(search);
         }
 
         function renderVendorList(search) {
             const list = document.getElementById('vendorList');
+            const isAdmin = currentUser.role === 'admin';
             const filtered = products.filter(p => !search || p.name.toLowerCase().includes(search));
+
             list.innerHTML = filtered.map(p => {
                 const sc = p.stock === 0 ? 'out' : p.stock < 5 ? 'low' : 'in';
-                return `<div class="vendor-item"><img src="${p.image}" class="vendor-img" onerror="this.src='https://via.placeholder.com/50'"><div class="vendor-info"><div class="vendor-name">${p.name}</div><div class="vendor-details">SKU: ${p.sku} | ${p.category} | <span class="product-stock stock-${sc}">Stock: ${p.stock}</span></div></div><div class="vendor-price">${formatPrice(p.price)}</div><div class="vendor-actions"><button class="vendor-add" onclick="addToCart(${p.id})" ${p.stock === 0 ? 'disabled' : ''}>${p.stock === 0 ? 'Agotado' : '+ Vender'}</button><button class="edit-btn" onclick="openEdit(${p.id})">✏️</button><button class="del-btn" onclick="openDelete(${p.id})">🗑️</button></div></div>`;
+                const pId = p.id || p.sku;
+                return `
+                    <div class="vendor-item">
+                        <img src="${p.image}" class="vendor-img" onerror="this.src='https://via.placeholder.com/50'">
+                        <div class="vendor-info">
+                            <div class="vendor-name">${p.name}</div>
+                            <div class="vendor-details">SKU: ${p.sku} | ${p.category} | <span class="product-stock stock-${sc}">Stock: ${p.stock}</span></div>
+                        </div>
+                        <div class="vendor-price">${formatPrice(p.price)}</div>
+                        <div class="vendor-actions">
+                            <button class="vendor-add" onclick="addToCart(${typeof pId === 'number' ? pId : `'${pId}'`})" ${p.stock === 0 ? 'disabled' : ''}>
+                                ${p.stock === 0 ? 'Agotado' : '+ Vender'}
+                            </button>
+                            ${isAdmin ? `
+                                <button class="edit-btn" onclick="openEdit('${pId}')">✏️</button>
+                                <button class="del-btn" onclick="openDelete('${pId}')">🗑️</button>
+                            ` : ''}
+                        </div>
+                    </div>`;
             }).join('');
         }
 
         function addToCart(id) {
-            const p = products.find(x => x.id === id);
+            const p = products.find(x => x.id == id || x.sku == id);
             if (!p || p.stock === 0) return;
-            const existing = cart.find(x => x.id === id);
-            if (existing) { if (existing.qty < p.stock) existing.qty++ }
+            const existing = cart.find(x => x.id == p.id || x.sku == p.sku);
+            if (existing) {
+                if (existing.qty < p.stock) existing.qty++
+            }
             else cart.push({ ...p, qty: 1 });
             updateCart();
         }
 
-        function removeFromCart(id) { cart = cart.filter(x => x.id !== id); updateCart() }
-        function updateQty(id, d) { const item = cart.find(x => x.id === id); const p = products.find(x => x.id === id); if (item) { item.qty += d; if (item.qty <= 0) removeFromCart(id); else if (item.qty > p.stock) item.qty = p.stock } updateCart() }
+        function removeFromCart(id) {
+            cart = cart.filter(x => x.id != id && x.sku != id);
+            updateCart()
+        }
+
+        function updateQty(id, d) {
+            const item = cart.find(x => x.id == id || x.sku == id);
+            const p = products.find(x => x.id == id || x.sku == id);
+            if (item) {
+                item.qty += d;
+                if (item.qty <= 0) removeFromCart(id);
+                else if (item.qty > p.stock) item.qty = p.stock
+            }
+            updateCart()
+        }
 
         function updateCart() {
             const container = document.getElementById('cartItems');
@@ -1187,22 +1326,73 @@
             document.getElementById('total').textContent = formatPrice(total);
             document.getElementById('checkoutBtn').disabled = cart.length === 0;
             if (cart.length === 0) { container.innerHTML = '<div class="cart-empty"><div class="cart-empty-icon">🛒</div><p>El carrito está vacío</p></div>'; return }
-            container.innerHTML = cart.map(i => `<div class="cart-item"><img src="${i.image}" class="cart-item-img" onerror="this.src='https://via.placeholder.com/60'"><div class="cart-item-info"><div class="cart-item-name">${i.name}</div><div class="cart-item-price">${formatPrice(i.price)}</div><div class="cart-item-qty"><button class="qty-btn" onclick="updateQty(${i.id},-1)">−</button><span>${i.qty}</span><button class="qty-btn" onclick="updateQty(${i.id},1)">+</button></div></div><button class="cart-item-remove" onclick="removeFromCart(${i.id})">×</button></div>`).join('');
+            container.innerHTML = cart.map(i => {
+                const iId = i.id || i.sku;
+                return `<div class="cart-item">
+                    <img src="${i.image}" class="cart-item-img" onerror="this.src='https://via.placeholder.com/60'">
+                    <div class="cart-item-info">
+                        <div class="cart-item-name">${i.name}</div>
+                        <div class="cart-item-price">${formatPrice(i.price)}</div>
+                        <div class="cart-item-qty">
+                            <button class="qty-btn" onclick="updateQty(${typeof iId === 'number' ? iId : `'${iId}'`},-1)">−</button>
+                            <span>${i.qty}</span>
+                            <button class="qty-btn" onclick="updateQty(${typeof iId === 'number' ? iId : `'${iId}'`},1)">+</button>
+                        </div>
+                    </div>
+                    <button class="cart-item-remove" onclick="removeFromCart(${typeof iId === 'number' ? iId : `'${iId}'` || iId})">×</button>
+                </div>`
+            }).join('');
         }
 
-        function openEdit(id) { const p = products.find(x => x.id === id); if (!p) return; document.getElementById('editId').value = p.id; document.getElementById('editName').value = p.name; document.getElementById('editSku').value = p.sku; document.getElementById('editCat').value = p.category; document.getElementById('editPrice').value = p.price; document.getElementById('editStock').value = p.stock; document.getElementById('editModal').classList.add('active') }
+        function openEdit(id) {
+            const p = products.find(x => x.id == id || x.sku == id);
+            if (!p) return;
+            document.getElementById('editId').value = p.id;
+            document.getElementById('editName').value = p.name;
+            document.getElementById('editSku').value = p.sku;
+            document.getElementById('editCat').value = p.category;
+            document.getElementById('editPrice').value = p.price;
+            document.getElementById('editStock').value = p.stock;
+            document.getElementById('editModal').classList.add('active')
+        }
         function closeEdit() { document.getElementById('editModal').classList.remove('active') }
-        function saveEdit(e) { e.preventDefault(); const id = parseInt(document.getElementById('editId').value); const idx = products.findIndex(p => p.id === id); if (idx !== -1) { products[idx] = { ...products[idx], name: document.getElementById('editName').value, sku: document.getElementById('editSku').value, category: document.getElementById('editCat').value, price: parseFloat(document.getElementById('editPrice').value), stock: parseInt(document.getElementById('editStock').value) }; localStorage.setItem('1807_products', JSON.stringify(products)); closeEdit(); render(); alert('✅ Producto actualizado') } }
+        function saveEdit(e) {
+            e.preventDefault();
+            const id = document.getElementById('editId').value;
+            const idx = products.findIndex(p => p.id == id || p.sku == id);
+            if (idx !== -1) {
+                products[idx] = {
+                    ...products[idx],
+                    name: document.getElementById('editName').value,
+                    sku: document.getElementById('editSku').value,
+                    category: document.getElementById('editCat').value,
+                    price: parseFloat(document.getElementById('editPrice').value),
+                    stock: parseInt(document.getElementById('editStock').value)
+                };
+                localStorage.setItem('1807_products', JSON.stringify(products));
+                closeEdit();
+                render();
+                alert('✅ Producto actualizado')
+            }
+        }
 
         function openDelete(id) { deleteId = id; document.getElementById('deleteModal').classList.add('active') }
         function closeDelete() { document.getElementById('deleteModal').classList.remove('active'); deleteId = null }
-        function confirmDelete() { if (deleteId !== null) { products = products.filter(p => p.id !== deleteId); localStorage.setItem('1807_products', JSON.stringify(products)); closeDelete(); render(); alert('🗑️ Producto eliminado') } }
+        function confirmDelete() {
+            if (deleteId !== null) {
+                products = products.filter(p => p.id != deleteId && p.sku != deleteId);
+                localStorage.setItem('1807_products', JSON.stringify(products));
+                closeDelete();
+                render();
+                alert('🗑️ Producto eliminado')
+            }
+        }
 
         function openPayment() { const total = cart.reduce((s, i) => s + i.price * i.qty, 0); document.getElementById('cashTotal').textContent = formatPrice(total); document.getElementById('qrTotal').textContent = formatPrice(total); document.getElementById('transferTotal').textContent = formatPrice(total); document.getElementById('cashReceived').value = ''; calcChange(); document.getElementById('paymentModal').classList.add('active') }
         function closePayment() { document.getElementById('paymentModal').classList.remove('active') }
         function setPayment(m) { payMethod = m; document.querySelectorAll('.payment-tab').forEach((t, i) => t.classList.toggle('active', (m === 'cash' && i === 0) || (m === 'qr' && i === 1) || (m === 'transfer' && i === 2))); document.getElementById('cashPanel').style.display = m === 'cash' ? 'block' : 'none'; document.getElementById('qrPanel').style.display = m === 'qr' ? 'block' : 'none'; document.getElementById('transferPanel').style.display = m === 'transfer' ? 'block' : 'none' }
         function calcChange() { const total = cart.reduce((s, i) => s + i.price * i.qty, 0); const received = parseFloat(document.getElementById('cashReceived').value) || 0; const change = received - total; const box = document.getElementById('changeBox'); const val = document.getElementById('changeValue'); if (received === 0) { val.textContent = '$0.00'; box.className = 'change-box ok' } else if (change < 0) { val.textContent = 'Falta ' + formatPrice(Math.abs(change)); box.className = 'change-box err' } else { val.textContent = formatPrice(change); box.className = 'change-box ok' } }
-        function confirmPay() { const total = cart.reduce((s, i) => s + i.price * i.qty, 0); if (payMethod === 'cash') { const received = parseFloat(document.getElementById('cashReceived').value) || 0; if (received < total) { alert('El monto recibido es insuficiente'); return } } cart.forEach(item => { const p = products.find(x => x.id === item.id); if (p) p.stock -= item.qty }); localStorage.setItem('1807_products', JSON.stringify(products)); genInvoice(); closePayment() }
+        function confirmPay() { const total = cart.reduce((s, i) => s + i.price * i.qty, 0); if (payMethod === 'cash') { const received = parseFloat(document.getElementById('cashReceived').value) || 0; if (received < total) { alert('El monto recibido es insuficiente'); return } } cart.forEach(item => { const p = products.find(x => x.id == item.id || x.sku == item.sku); if (p) p.stock -= item.qty }); localStorage.setItem('1807_products', JSON.stringify(products)); genInvoice(); closePayment() }
         function genInvoice() { const total = cart.reduce((s, i) => s + i.price * i.qty, 0); const num = 'INV-' + Date.now().toString().slice(-8); const date = new Date().toLocaleString(); const received = parseFloat(document.getElementById('cashReceived').value) || total; const change = Math.max(0, received - total); document.getElementById('invoiceContent').innerHTML = `<div class="invoice" id="invoicePrint"><div class="invoice-header"><div class="invoice-logo">1807.studio</div><div style="font-size:.85rem;color:#666">FACTURA DE VENTA</div><div style="font-size:.75rem;color:#999">${date}</div><div style="font-size:.75rem;margin-top:.5rem">N° ${num}</div></div><div style="margin:1rem 0"><div class="invoice-row" style="font-weight:600;border-bottom:1px solid #ddd;padding-bottom:.5rem"><span style="flex:1">Producto</span><span style="width:40px;text-align:center">Cant</span><span style="width:80px;text-align:right">Precio</span></div>${cart.map(i => `<div class="invoice-row"><span style="flex:1">${i.name}</span><span style="width:40px;text-align:center">${i.qty}</span><span style="width:80px;text-align:right">${formatPrice(i.price * i.qty)}</span></div>`).join('')}</div><div class="invoice-totals"><div class="invoice-row"><span>Subtotal:</span><span>${formatPrice(total)}</span></div><div class="invoice-row"><span>Impuesto:</span><span>$0.00</span></div><div class="invoice-row invoice-grand"><span>TOTAL:</span><span>${formatPrice(total)}</span></div>${payMethod === 'cash' ? `<div class="invoice-row"><span>Recibido:</span><span>${formatPrice(received)}</span></div><div class="invoice-row"><span>Cambio:</span><span>${formatPrice(change)}</span></div>` : ''}<div class="invoice-row"><span>Método:</span><span>${payMethod === 'cash' ? 'Efectivo' : payMethod === 'qr' ? 'QR' : 'Transferencia'}</span></div></div><div class="invoice-footer"><p>¡Gracias por su compra!</p><p>www.1807.studio</p></div></div>`; document.getElementById('invoiceModal').classList.add('active'); cart = []; updateCart(); render() }
         function closeInvoice() { document.getElementById('invoiceModal').classList.remove('active') }
         function printInvoice() { const content = document.getElementById('invoicePrint').innerHTML; const win = window.open('', '_blank'); win.document.write(`<html><head><title>Factura</title><style>body{font-family:'Courier New',monospace;padding:20px;max-width:400px;margin:0 auto}.invoice-row{display:flex;justify-content:space-between;padding:5px 0}.invoice-totals{border-top:2px dashed #000;padding-top:10px;margin-top:10px}.invoice-grand{font-weight:bold;font-size:18px;border-top:1px solid #000;margin-top:5px;padding-top:5px}.invoice-footer{text-align:center;margin-top:20px;border-top:2px dashed #000;padding-top:15px}</style></head><body>${content}</body></html>`); win.document.close(); win.print() }
