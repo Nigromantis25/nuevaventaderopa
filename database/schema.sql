@@ -1,13 +1,4 @@
--- 1807.studio - Database Schema for Microsoft SQL Server
--- Script for creating tables and initial sample data
 
--- 1. Create Database (If not exists)
--- CREATE DATABASE [1807_Studio_DB];
--- GO
--- USE [1807_Studio_DB];
--- GO
-
--- 2. Drop existing tables if they exist (Order matters due to FK)
 IF OBJECT_ID('OrderItems', 'U') IS NOT NULL DROP TABLE OrderItems;
 IF OBJECT_ID('Orders',    'U') IS NOT NULL DROP TABLE Orders;
 IF OBJECT_ID('Products',  'U') IS NOT NULL DROP TABLE Products;
