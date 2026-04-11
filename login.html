@@ -474,8 +474,8 @@
                     <div id="loginError" class="error-message"></div>
 
                     <div class="form-group">
-                        <label class="form-label">Correo Electrónico</label>
-                        <input type="email" class="form-input" id="loginEmail" placeholder="tu@email.com" required>
+                        <label class="form-label">Correo Electrónico / Usuario</label>
+                        <input type="text" class="form-input" id="loginEmail" placeholder="Usuario o Email" required>
                     </div>
 
                     <div class="form-group">
@@ -495,26 +495,12 @@
 
                     <div class="login-divider"><span>Acceso rápido</span></div>
 
-                    <div class="role-selector">
-                        <label class="role-option">
-                            <input type="radio" name="quickRole" value="admin" onclick="quickLogin('admin')">
-                            <div class="role-card">
-                                <span class="role-icon">👑</span>
-                                <span class="role-name">Admin</span>
-                            </div>
-                        </label>
-                        <label class="role-option">
-                            <input type="radio" name="quickRole" value="vendedor" onclick="quickLogin('vendedor')">
-                            <div class="role-card">
-                                <span class="role-icon">🛒</span>
-                                <span class="role-name">Vendedor</span>
-                            </div>
-                        </label>
+                    <div class="role-selector" style="grid-template-columns: 1fr;">
                         <label class="role-option">
                             <input type="radio" name="quickRole" value="usuario" onclick="quickLogin('usuario')">
                             <div class="role-card">
                                 <span class="role-icon">👤</span>
-                                <span class="role-name">Usuario</span>
+                                <span class="role-name">Explorar como Usuario (Demo)</span>
                             </div>
                         </label>
                     </div>
@@ -547,32 +533,8 @@
                             minlength="6" required>
                     </div>
 
-                    <div class="form-group">
-                        <label class="form-label">Tipo de Cuenta</label>
-                        <div class="role-selector">
-                            <label class="role-option">
-                                <input type="radio" name="regRole" value="usuario" checked>
-                                <div class="role-card">
-                                    <span class="role-icon">👤</span>
-                                    <span class="role-name">Usuario</span>
-                                </div>
-                            </label>
-                            <label class="role-option">
-                                <input type="radio" name="regRole" value="vendedor">
-                                <div class="role-card">
-                                    <span class="role-icon">🛒</span>
-                                    <span class="role-name">Vendedor</span>
-                                </div>
-                            </label>
-                            <label class="role-option">
-                                <input type="radio" name="regRole" value="admin">
-                                <div class="role-card">
-                                    <span class="role-icon">👑</span>
-                                    <span class="role-name">Admin</span>
-                                </div>
-                            </label>
-                        </div>
-                    </div>
+                    <!-- Role selector removed, normal users are always 'usuario' -->
+                    <input type="hidden" name="regRole" value="usuario">
 
                     <button type="submit" class="btn-login">Crear Cuenta</button>
                 </form>
@@ -602,14 +564,24 @@
     <script>
         // Usuarios por defecto
         const defaultUsers = [
-            { email: 'admin@1807.studio', password: 'admin123', name: 'Administrador', role: 'admin' },
+            { email: 'ithan', password: '1234', name: 'Administrador', role: 'admin' },
             { email: 'vendedor@1807.studio', password: 'vendedor123', name: 'Vendedor', role: 'vendedor' },
             { email: 'usuario@1807.studio', password: 'usuario123', name: 'Usuario', role: 'usuario' }
         ];
 
-        // Inicializar usuarios si no existen
-        if (!localStorage.getItem('1807_users')) {
+        // Inicializar usuarios si no existen, o asegurar que el admin sea ithan
+        let currentLocalUsers = JSON.parse(localStorage.getItem('1807_users') || 'null');
+        if (!currentLocalUsers) {
             localStorage.setItem('1807_users', JSON.stringify(defaultUsers));
+        } else {
+            // Asegurarnos de que el usuario ithan exista y sea admin
+            const hasIthan = currentLocalUsers.find(u => u.email === 'ithan');
+            if (!hasIthan) {
+                // Eliminar el antiguo admin si existía y agregar a ithan
+                currentLocalUsers = currentLocalUsers.filter(u => u.role !== 'admin');
+                currentLocalUsers.push({ email: 'ithan', password: '1234', name: 'Administrador', role: 'admin' });
+                localStorage.setItem('1807_users', JSON.stringify(currentLocalUsers));
+            }
         }
 
         function switchTab(tab) {
@@ -656,7 +628,8 @@
             const name = document.getElementById('regName').value + ' ' + document.getElementById('regLastName').value;
             const email = document.getElementById('regEmail').value;
             const password = document.getElementById('regPassword').value;
-            const role = document.querySelector('input[name="regRole"]:checked').value;
+            const roleInput = document.querySelector('input[name="regRole"]');
+            const role = roleInput ? roleInput.value : 'usuario';
 
             const errorEl = document.getElementById('registerError');
             const successEl = document.getElementById('registerSuccess');
@@ -681,6 +654,18 @@
         }
 
         function quickLogin(role) {
+            if (role === 'admin') {
+                const email = document.getElementById('loginEmail').value;
+                const pass = document.getElementById('loginPassword').value;
+                if (email !== 'ithan' || pass !== '1234') {
+                    const errorEl = document.getElementById('loginError');
+                    // Mensaje genérico para no exponer los credenciales de administrador
+                    errorEl.textContent = 'Acceso denegado. Credenciales incorrectas.';
+                    errorEl.style.display = 'block';
+                    return;
+                }
+            }
+
             const users = JSON.parse(localStorage.getItem('1807_users') || '[]');
             const user = users.find(u => u.role === role);
 

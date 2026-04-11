@@ -416,6 +416,9 @@ function renderUsersSection() {
                 <h1 class="dashboard-title">Registro de Cuentas</h1>
                 <p class="dashboard-subtitle">Listado de todos los usuarios registrados en el sistema.</p>
             </div>
+            <div class="dashboard-actions">
+                <button class="btn btn-primary" onclick="openUserModal()">➕ Crear Usuario</button>
+            </div>
         </div>
         
         <div class="users-container">
@@ -478,6 +481,41 @@ function renderUsersSection() {
                 </table>
             </section>
         </div>`;
+}
+
+// ========================================
+// USUARIOS CRUD (ADMIN ONLY)
+// ========================================
+function openUserModal() {
+    document.getElementById('userModal').classList.add('active');
+    document.getElementById('userForm').reset();
+}
+
+function closeUserModal() {
+    document.getElementById('userModal').classList.remove('active');
+}
+
+function saveUser(e) {
+    if (e) e.preventDefault();
+    const name = document.getElementById('userName').value;
+    const email = document.getElementById('userEmail').value;
+    const password = document.getElementById('userPassword').value;
+    const roleInput = document.querySelector('input[name="userRole"]:checked');
+    const role = roleInput ? roleInput.value : 'usuario';
+    
+    let allUsers = JSON.parse(localStorage.getItem('1807_users')) || [];
+    
+    if (allUsers.find(u => u.email === email)) {
+        showToast('Ese usuario o email ya está registrado', 'error');
+        return;
+    }
+    
+    allUsers.push({ email, password, name, role });
+    localStorage.setItem('1807_users', JSON.stringify(allUsers));
+    
+    showToast(`Cuenta de ${role} creada exitosamente`);
+    closeUserModal();
+    renderSection('users');
 }
 
 // ========================================
@@ -639,6 +677,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('clientModalClose')?.addEventListener('click', closeClientModal);
     document.getElementById('cancelClientBtn')?.addEventListener('click', closeClientModal);
     document.getElementById('clientForm')?.addEventListener('submit', saveClient);
+    document.getElementById('userForm')?.addEventListener('submit', saveUser);
     document.getElementById('dismissAlert')?.addEventListener('click', closeSaleAlert);
     document.getElementById('attendSale')?.addEventListener('click', attendSale);
 
@@ -755,4 +794,6 @@ window.navigateTo = navigateTo;
 window.logout = logout;
 window.updateStock = updateStock;
 window.filterLowStock = filterLowStock;
+window.openUserModal = openUserModal;
+window.closeUserModal = closeUserModal;
 

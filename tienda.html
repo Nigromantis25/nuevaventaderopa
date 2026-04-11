@@ -937,6 +937,225 @@
             border: 2px solid var(--bg);
         }
 
+        .chatbot-widget {
+            position: fixed;
+            bottom: 100px;
+            right: 2rem;
+            width: 360px;
+            max-height: 520px;
+            background: var(--bg-card);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 24px;
+            box-shadow: 0 24px 80px rgba(0, 0, 0, 0.35);
+            display: flex;
+            flex-direction: column;
+            z-index: 1600;
+            transform: translateY(20px) scale(0.95);
+            opacity: 0;
+            visibility: hidden;
+            transition: transform 0.25s ease, opacity 0.25s ease, visibility 0.25s ease;
+            overflow: hidden;
+        }
+
+        .chatbot-widget.active {
+            transform: translateY(0) scale(1);
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .chatbot-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 1.25rem;
+            background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+        }
+
+        .chatbot-header-info {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .chatbot-avatar {
+            width: 42px;
+            height: 42px;
+            background: rgba(255, 255, 255, 0.18);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 1.1rem;
+        }
+
+        .chatbot-header h4 {
+            color: var(--bg);
+            font-size: 1rem;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .chatbot-status {
+            color: rgba(255, 255, 255, 0.95);
+            font-size: 0.85rem;
+        }
+
+        .chatbot-minimize {
+            background: transparent;
+            border: none;
+            color: #fff;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            border-radius: 12px;
+        }
+
+        .chatbot-messages {
+            flex: 1;
+            padding: 1rem;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .chat-message {
+            max-width: 85%;
+            padding: 0.9rem 1rem;
+            border-radius: 18px;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            animation: messageSlide 0.22s ease;
+        }
+
+        @keyframes messageSlide {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .chat-message.bot {
+            background: rgba(255, 255, 255, 0.08);
+            color: var(--text);
+            align-self: flex-start;
+        }
+
+        .chat-message.user {
+            background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+            color: var(--bg);
+            align-self: flex-end;
+        }
+
+        .chat-message.typing {
+            background: rgba(255, 255, 255, 0.06);
+            color: rgba(255, 255, 255, 0.8);
+            align-self: flex-start;
+            font-style: italic;
+        }
+
+        .chatbot-input-container {
+            display: flex;
+            gap: 0.75rem;
+            padding: 1rem;
+            background: var(--bg-card);
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .chatbot-input {
+            flex: 1;
+            padding: 0.9rem 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 14px;
+            color: var(--text);
+            font-size: 0.95rem;
+        }
+
+        .chatbot-input:focus {
+            outline: none;
+            border-color: rgba(201, 169, 98, 0.8);
+        }
+
+        .chatbot-send {
+            width: 48px;
+            min-width: 48px;
+            height: 48px;
+            border: none;
+            border-radius: 14px;
+            background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+            color: var(--bg);
+            cursor: pointer;
+            display: grid;
+            place-items: center;
+        }
+
+        .chatbot-toggle {
+            position: fixed;
+            bottom: 1.5rem;
+            right: 2rem;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            border: none;
+            background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+            color: var(--bg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 18px 40px rgba(0, 0, 0, 0.25);
+            cursor: pointer;
+            z-index: 1700;
+            transition: transform 0.2s ease;
+        }
+
+        .chatbot-toggle:hover {
+            transform: scale(1.05);
+        }
+
+        .chatbot-toggle-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: var(--danger);
+            color: #fff;
+            font-size: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid var(--bg);
+        }
+
+        @media(max-width:992px) {
+            .chatbot-widget {
+                right: 1rem;
+                bottom: 90px;
+                width: calc(100% - 2rem);
+                max-height: 60vh;
+            }
+        }
+
+        @media(max-width:768px) {
+            .chatbot-toggle {
+                right: 1rem;
+                bottom: 1rem;
+            }
+        }
+
+        @media(max-width:480px) {
+            .chatbot-widget {
+                width: 100%;
+                right: 0;
+                border-radius: 0;
+            }
+        }
+
         @media(max-width:992px) {
             .cart-toggle {
                 display: flex
@@ -1399,6 +1618,56 @@
 
         document.addEventListener('DOMContentLoaded', init);
     </script>
+
+    <!-- Chatbot Widget Mejorado -->
+    <div class="chatbot-widget" id="chatbotWidget">
+        <div class="chatbot-header">
+            <div class="chatbot-header-info">
+                <div class="chatbot-avatar">
+                    <span id="chatbotAvatarIcon">🤖</span>
+                </div>
+                <div>
+                    <h4 id="chatbotTitle">Asistente 1807</h4>
+                    <span class="chatbot-status" id="chatbotStatus">● En línea</span>
+                </div>
+            </div>
+            <button class="chatbot-minimize" id="minimizeChatbot">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+            </button>
+        </div>
+        <div class="chatbot-messages" id="chatbotMessages">
+            <!-- Messages will be added here -->
+        </div>
+        <div class="chatbot-input-container">
+            <input type="text" class="chatbot-input" id="chatbotInput" placeholder="Escribe tu mensaje...">
+            <button class="chatbot-send" id="chatbotSend">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <!-- Chatbot Toggle Button Mejorado -->
+    <button class="chatbot-toggle" id="chatbotToggle">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="chat-icon">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+        </svg>
+        <span class="chatbot-toggle-badge" id="chatbotBadge">0</span>
+    </button>
+
+    <!-- Supabase Configuration -->
+    <script type="module">
+        // Importar todas las funciones de Supabase
+        export { supabase, signUpUser, signInUser, signOutUser, getProducts, getProductById, getProductsByCategory, addToCart, getCartItems, removeFromCart, createOrder, getOrders, getCategories, getBrands, subscribeToProductChanges, subscribeToCartChanges } from './supabase.js'
+    </script>
+
+    <!-- Chatbot Mejorado -->
+    <script type="module" src="chatbot.js"></script>
 </body>
 
 </html>

@@ -1,7 +1,8 @@
 -- ============================================
--- BASE DE DATOS STORE ONLINE - -- ============================================
-CREATE DATABASE IF NOT EXISTS store_online;
-USE store_online;
+-- BASE DE DATOS STORE ONLINE BACKUP
+-- ============================================
+CREATE DATABASE IF NOT EXISTS store_online_backup;
+USE store_online_backup;
 
 -- ============================================
 -- TABLAS PRINCIPALES DEL SISTEMA
@@ -92,7 +93,7 @@ CREATE TABLE producto (
 );
 
 -- ============================================
--- TABLAS DE PROVEEDORES (NUEVAS)
+-- TABLAS DE PROVEEDORES
 -- ============================================
 
 -- 9. PROVEEDORES
@@ -170,7 +171,7 @@ CREATE TABLE carrito (
     idproducto INT NOT NULL,
     cantidad INT DEFAULT 1,
     FOREIGN KEY (idcliente) REFERENCES cliente(idcliente) ON DELETE CASCADE,
-    FOREIGN KEY (idproducto) REFERENCES producto(idproducto) ON DELETE CASCADE
+    FOREIGN KEY (idproducto) REFERENCIAS producto(idproducto) ON DELETE CASCADE
 );
 
 -- ============================================

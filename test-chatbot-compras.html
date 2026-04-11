@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🛒 Prueba Chatbot Compras - 1807.studio</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #0D0D0D 0%, #1A1A1A 100%);
+            color: #fff;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #1A1A1A;
+            border-radius: 12px;
+            border: 1px solid #333;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            color: #C9A962;
+        }
+
+        .header p {
+            color: #B8B8B8;
+            font-size: 1.1em;
+        }
+
+        .test-section {
+            background: #1A1A1A;
+            border: 1px solid #333;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .test-title {
+            font-size: 1.3em;
+            color: #C9A962;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .command-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .command-item {
+            background: #0D0D0D;
+            border-left: 4px solid #C9A962;
+            padding: 15px;
+            border-radius: 6px;
+        }
+
+        .command-item h4 {
+            color: #C9A962;
+            margin-bottom: 8px;
+        }
+
+        .command-item p {
+            color: #B8B8B8;
+            font-size: 0.9em;
+            margin-bottom: 8px;
+        }
+
+        .command-code {
+            background: #1A1A1A;
+            border: 1px solid #333;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-family: 'Monaco', 'Courier New', monospace;
+            color: #4ADE80;
+            font-size: 0.85em;
+            margin-top: 5px;
+        }
+
+        .chatbot-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 350px;
+            height: 500px;
+            background: #1A1A1A;
+            border: 1px solid #333;
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            z-index: 1000;
+        }
+
+        .chatbot-header {
+            background: #C9A962;
+            color: #000;
+            padding: 15px;
+            border-radius: 12px 12px 0 0;
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .chatbot-messages {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+            max-height: 350px;
+        }
+
+        .chat-message {
+            margin-bottom: 12px;
+            padding: 10px 12px;
+            border-radius: 8px;
+            max-width: 80%;
+            word-wrap: break-word;
+        }
+
+        .chat-message.bot {
+            background: #333;
+            color: #fff;
+            margin-right: auto;
+        }
+
+        .chat-message.user {
+            background: #C9A962;
+            color: #000;
+            margin-left: auto;
+            text-align: right;
+        }
+
+        .chat-message.typing {
+            background: #333;
+            color: #B8B8B8;
+            font-style: italic;
+        }
+
+        .chatbot-input-area {
+            border-top: 1px solid #333;
+            padding: 15px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .chatbot-input {
+            flex: 1;
+            padding: 10px 12px;
+            border: 1px solid #333;
+            border-radius: 6px;
+            background: #0D0D0D;
+            color: #fff;
+            font-size: 14px;
+        }
+
+        .chatbot-input:focus {
+            outline: none;
+            border-color: #C9A962;
+        }
+
+        .chatbot-send {
+            background: #C9A962;
+            color: #000;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .chatbot-send:hover {
+            background: #9A7B3C;
+        }
+
+        .close-chatbot {
+            background: none;
+            border: none;
+            color: #000;
+            font-size: 18px;
+            cursor: pointer;
+            padding: 0;
+        }
+
+        .instructions {
+            background: #1A1A1A;
+            border: 1px solid #333;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .instructions h3 {
+            color: #C9A962;
+            margin-bottom: 15px;
+        }
+
+        .instructions ol {
+            color: #B8B8B8;
+            line-height: 1.6;
+        }
+
+        .instructions li {
+            margin-bottom: 10px;
+        }
+
+        .highlight {
+            background: #C9A962;
+            color: #000;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🛒 Prueba del Chatbot de Compras</h1>
+            <p>1807.studio - Sistema de compras directas por WhatsApp</p>
+        </div>
+
+        <div class="instructions">
+            <h3>📋 Cómo probar las nuevas funcionalidades:</h3>
+            <ol>
+                <li><strong>Ver productos:</strong> Escribe <span class="highlight">"quiero comprar algo"</span> en el chatbot</li>
+                <li><strong>Comprar producto:</strong> Escribe <span class="highlight">"quiero esto [número]"</span> (ejemplo: "quiero esto 1")</li>
+                <li><strong>Alerta automática:</strong> Se enviará automáticamente al WhatsApp 78810097</li>
+                <li><strong>Funciona para todos:</strong> Admin, clientes registrados y visitantes</li>
+            </ol>
+        </div>
+
+        <div class="test-section">
+            <div class="test-title">🎯 Comandos de Compra Directa</div>
+            <div class="command-list">
+                <div class="command-item">
+                    <h4>Ver todos los productos</h4>
+                    <p>Muestra el catálogo completo con números para comprar</p>
+                    <div class="command-code">quiero comprar algo</div>
+                </div>
+                <div class="command-item">
+                    <h4>Comprar producto específico</h4>
+                    <p>Compra instantánea por WhatsApp con el número del producto</p>
+                    <div class="command-code">quiero esto 1</div>
+                </div>
+                <div class="command-item">
+                    <h4>Ver ayuda completa</h4>
+                    <p>Muestra todas las funciones disponibles</p>
+                    <div class="command-code">ayuda</div>
+                </div>
+                <div class="command-item">
+                    <h4>Ver productos normales</h4>
+                    <p>Catalogo estándar (sin números de compra)</p>
+                    <div class="command-code">productos</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <div class="test-title">📱 Funcionalidades por Tipo de Usuario</div>
+            <div class="command-list">
+                <div class="command-item">
+                    <h4>Para Administradores</h4>
+                    <p>Acceso completo a gestión + compras directas</p>
+                    <p>✅ Gestión de inventario<br>✅ Compras directas<br>✅ Estadísticas</p>
+                </div>
+                <div class="command-item">
+                    <h4>Para Clientes Registrados</h4>
+                    <p>Carrito de compras + compras directas</p>
+                    <p>✅ Carrito de compras<br>✅ Compras directas<br>✅ Historial de pedidos</p>
+                </div>
+                <div class="command-item">
+                    <h4>Para Visitantes</h4>
+                    <p>Compras directas sin registro</p>
+                    <p>✅ Ver productos<br>✅ Compras directas<br>❌ Carrito (requiere cuenta)</p>
+                </div>
+                <div class="command-item">
+                    <h4>Alerta Automática</h4>
+                    <p>Notificación inmediata por WhatsApp</p>
+                    <p>📱 Número: 78810097<br>⚡ Respuesta: 2-5 min<br>📋 Detalles completos del pedido</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chatbot Widget -->
+    <div class="chatbot-container" id="chatbotWidget">
+        <div class="chatbot-header">
+            <span>🤖 Asistente 1807.studio</span>
+            <button class="close-chatbot" onclick="toggleChatbot()">×</button>
+        </div>
+        <div class="chatbot-messages" id="chatbotMessages"></div>
+        <div class="chatbot-input-area">
+            <input type="text" class="chatbot-input" id="chatbotInput" placeholder="Escribe tu mensaje...">
+            <button class="chatbot-send" id="chatbotSend">Enviar</button>
+        </div>
+    </div>
+
+    <script type="module">
+        // Importar funciones necesarias
+        import { supabase } from './supabase.js'
+        import { initSupabase } from './init-supabase.js'
+
+        // Inicializar Supabase
+        window.addEventListener('load', async () => {
+            console.log('🚀 Iniciando prueba del chatbot...')
+            await initSupabase()
+        })
+
+        // Incluir el código del chatbot aquí para la prueba
+        let chatbotOpen = true;
+        let currentUser = null;
+        let userType = 'guest';
+
+        // Función para alternar chatbot (siempre visible en esta página)
+        function toggleChatbot() {
+            chatbotOpen = !chatbotOpen;
+            const widget = document.getElementById('chatbotWidget');
+            widget.style.display = chatbotOpen ? 'flex' : 'none';
+        }
+
+        // Función para agregar mensaje del bot
+        function addBotMessage(text) {
+            const container = document.getElementById('chatbotMessages');
+            const msg = document.createElement('div');
+            msg.className = 'chat-message bot';
+            msg.innerHTML = text.replace(/\n/g, '<br>');
+            container.appendChild(msg);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        // Función para agregar mensaje del usuario
+        function addUserMessage(text) {
+            const container = document.getElementById('chatbotMessages');
+            const msg = document.createElement('div');
+            msg.className = 'chat-message user';
+            msg.textContent = text;
+            container.appendChild(msg);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        // Función para enviar mensaje
+        async function sendChatMessage() {
+            const input = document.getElementById('chatbotInput');
+            const text = input.value.trim();
+            if (!text) return;
+
+            addUserMessage(text);
+            input.value = '';
+
+            // Mostrar "escribiendo..."
+            const typingDiv = document.createElement('div');
+            typingDiv.className = 'chat-message bot typing';
+            typingDiv.innerHTML = '🤖 Escribiendo...';
+            document.getElementById('chatbotMessages').appendChild(typingDiv);
+
+            setTimeout(async () => {
+                typingDiv.remove();
+
+                // Simular respuesta del chatbot
+                let response = '';
+
+                if (text.toLowerCase().includes('quiero comprar algo')) {
+                    response = '🛍️ ¡Perfecto! Aquí tienes todos nuestros productos:\n\n1. Producto de ejemplo 1\n   💰 Bs 100\n   📦 Stock: 5\n\n2. Producto de ejemplo 2\n   💰 Bs 200\n   📦 Stock: 3\n\n💡 Escribe "quiero esto 1" para comprar el primer producto';
+                } else if (text.toLowerCase().includes('quiero esto')) {
+                    const match = text.match(/quiero esto\s+(\d+)/);
+                    if (match) {
+                        const num = match[1];
+                        response = `🎉 ¡PEDIDO ENVIADO!\n\nProducto #${num} solicitado\n\n✅ Alerta enviada a WhatsApp 78810097\n\n📞 Un asesor te contactará pronto`;
+                    } else {
+                        response = '💡 Escribe "quiero esto [número]" para comprar\nEjemplo: "quiero esto 1"';
+                    }
+                } else if (text.toLowerCase().includes('ayuda')) {
+                    response = '🤖 Funciones disponibles:\n\n🛒 "quiero comprar algo" - Ver productos\n🛒 "quiero esto [número]" - Comprar producto\n💬 "ayuda" - Este mensaje';
+                } else {
+                    response = `🤔 No entendí "${text}". Escribe "ayuda" para ver opciones.`;
+                }
+
+                addBotMessage(response);
+            }, 1000);
+        }
+
+        // Event listeners
+        document.getElementById('chatbotInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendChatMessage();
+        });
+        document.getElementById('chatbotSend').addEventListener('click', sendChatMessage);
+
+        // Mensaje inicial
+        setTimeout(() => {
+            addBotMessage('¡Hola! 👋 Soy el asistente de 1807.studio\n\n🚀 *NUEVO:* Escribe "quiero comprar algo" para ver productos y comprar por WhatsApp\n\n💡 Escribe "ayuda" para ver todas las opciones');
+        }, 1000);
+
+        // Exponer funciones globales
+        window.toggleChatbot = toggleChatbot;
+        window.sendChatMessage = sendChatMessage;
+    </script>
+</body>
+</html>

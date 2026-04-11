@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🧪 Prueba Supabase</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #0D0D0D 0%, #1A1A1A 100%);
+            color: #fff;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            color: #C9A962;
+        }
+        
+        .header p {
+            color: #B8B8B8;
+            font-size: 1.1em;
+        }
+        
+        .test-section {
+            background: #1A1A1A;
+            border: 1px solid #333;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .test-title {
+            font-size: 1.3em;
+            color: #C9A962;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .test-status {
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 0.9em;
+        }
+        
+        .status-loading {
+            background: #6B6B6B;
+            color: white;
+        }
+        
+        .status-success {
+            background: #4ADE80;
+            color: #000;
+        }
+        
+        .status-error {
+            background: #F87171;
+            color: white;
+        }
+        
+        .test-output {
+            background: #0D0D0D;
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 15px;
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 0.9em;
+            max-height: 300px;
+            overflow-y: auto;
+            color: #4ADE80;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+        
+        .log-item {
+            margin-bottom: 8px;
+            padding: 5px 0;
+        }
+        
+        .log-item.info { color: #60A5FA; }
+        .log-item.success { color: #4ADE80; }
+        .log-item.error { color: #F87171; }
+        .log-item.warning { color: #FBBF24; }
+        
+        button {
+            background: #C9A962;
+            color: #000;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 15px;
+            transition: background 0.3s;
+        }
+        
+        button:hover {
+            background: #9A7B3C;
+        }
+        
+        .results-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .result-item {
+            background: #0D0D0D;
+            border-left: 4px solid #C9A962;
+            padding: 15px;
+            border-radius: 6px;
+        }
+        
+        .result-label {
+            color: #B8B8B8;
+            font-size: 0.85em;
+            margin-bottom: 5px;
+        }
+        
+        .result-value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #C9A962;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧪 Prueba de Supabase</h1>
+            <p>Verificando conexión y cargando datos...</p>
+        </div>
+        
+        <div class="test-section">
+            <div class="test-title">
+                🔗 Conexión
+                <span class="test-status" id="connectionStatus">Probando...</span>
+            </div>
+            <div class="test-output" id="connectionLog"></div>
+        </div>
+        
+        <div class="test-section">
+            <div class="test-title">
+                📦 Productos
+                <span class="test-status" id="productsStatus">Esperando...</span>
+            </div>
+            <div class="test-output" id="productsLog"></div>
+            <button onclick="loadProducts()">📥 Cargar Productos</button>
+        </div>
+        
+        <div class="test-section">
+            <div class="test-title">
+                🏷️ Categorías
+                <span class="test-status" id="categoriesStatus">Esperando...</span>
+            </div>
+            <div class="test-output" id="categoriesLog"></div>
+            <button onclick="loadCategories()">📥 Cargar Categorías</button>
+        </div>
+        
+        <div class="test-section">
+            <div class="test-title">📊 Resumen</div>
+            <div class="results-grid">
+                <div class="result-item">
+                    <div class="result-label">Total Productos</div>
+                    <div class="result-value" id="totalProducts">-</div>
+                </div>
+                <div class="result-item">
+                    <div class="result-label">Total Categorías</div>
+                    <div class="result-value" id="totalCategories">-</div>
+                </div>
+            </div>
+            <button onclick="window.location.href='index.html'" style="background: #60A5FA; margin-top: 20px; width: 100%;">✅ Ir al Dashboard</button>
+        </div>
+    </div>
+    
+    <script type="module">
+        import { supabase, getProducts, getCategories } from './supabase.js'
+        import { initSupabase } from './init-supabase.js'
+        
+        let connectionOK = false
+        
+        function addLog(elementId, message, type = 'info') {
+            const logEl = document.getElementById(elementId)
+            const logItem = document.createElement('div')
+            logItem.className = `log-item ${type}`
+            const timestamp = new Date().toLocaleTimeString('es-ES')
+            logItem.textContent = `[${timestamp}] ${message}`
+            logEl.appendChild(logItem)
+            logEl.scrollTop = logEl.scrollHeight
+        }
+        
+        function setStatus(elementId, status, text) {
+            const statusEl = document.getElementById(elementId)
+            statusEl.className = `test-status status-${status}`
+            statusEl.textContent = text
+        }
+        
+        // Probar conexión
+        async function testConnection() {
+            addLog('connectionLog', '🔄 Probando conexión...', 'info')
+            setStatus('connectionStatus', 'loading', 'Probando...')
+            
+            const result = await initSupabase()
+            if (result.success) {
+                addLog('connectionLog', '✅ Conexión exitosa a Supabase', 'success')
+                addLog('connectionLog', 'URL: https://fohveedquqchtnzhkcyh.supabase.co', 'info')
+                setStatus('connectionStatus', 'success', '✅ Conectado')
+                connectionOK = true
+            } else {
+                addLog('connectionLog', `❌ Error: ${result.error}`, 'error')
+                setStatus('connectionStatus', 'error', '❌ Error')
+                addLog('connectionLog', '⚠️ Verifica tu conexión a internet', 'warning')
+            }
+        }
+        
+        // Cargar productos
+        window.loadProducts = async function() {
+            if (!connectionOK) {
+                addLog('productsLog', '⚠️ Conexión no establecida', 'warning')
+                return
+            }
+            
+            addLog('productsLog', '🔄 Cargando productos...', 'info')
+            setStatus('productsStatus', 'loading', 'Cargando...')
+            
+            const result = await getProducts()
+            if (result.success) {
+                addLog('productsLog', `✅ ${result.data.length} productos cargados`, 'success')
+                result.data.forEach((p, i) => {
+                    addLog('productsLog', `   ${i + 1}. ${p.nombre || 'Sin nombre'} - $${p.precio}`, 'info')
+                })
+                document.getElementById('totalProducts').textContent = result.data.length
+                setStatus('productsStatus', 'success', '✅ Cargado')
+            } else {
+                addLog('productsLog', `❌ Error: ${result.error}`, 'error')
+                setStatus('productsStatus', 'error', '❌ Error')
+            }
+        }
+        
+        // Cargar categorías
+        window.loadCategories = async function() {
+            if (!connectionOK) {
+                addLog('categoriesLog', '⚠️ Conexión no establecida', 'warning')
+                return
+            }
+            
+            addLog('categoriesLog', '🔄 Cargando categorías...', 'info')
+            setStatus('categoriesStatus', 'loading', 'Cargando...')
+            
+            const result = await getCategories()
+            if (result.success) {
+                addLog('categoriesLog', `✅ ${result.data.length} categorías cargadas`, 'success')
+                result.data.forEach((c, i) => {
+                    addLog('categoriesLog', `   ${i + 1}. ${c.descripcion || 'Sin descripción'}`, 'info')
+                })
+                document.getElementById('totalCategories').textContent = result.data.length
+                setStatus('categoriesStatus', 'success', '✅ Cargado')
+            } else {
+                addLog('categoriesLog', `❌ Error: ${result.error}`, 'error')
+                setStatus('categoriesStatus', 'error', '❌ Error')
+            }
+        }
+        
+        // Iniciar prueba automáticamente
+        window.addEventListener('load', () => {
+            testConnection()
+        })
+    </script>
+</body>
+</html>
